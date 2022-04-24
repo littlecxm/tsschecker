@@ -104,6 +104,7 @@ int print_tss_request = 0;
 int print_tss_response = 0;
 int nocache = 0;
 int save_shshblobs = 0;
+int save_bplist = 0;
 const char *shshSavePath = "."DIRECTORY_DELIMITER_STR;
 
 // iPhone & iPod touch 1st generation models do not use SHSH or APTicket.
@@ -119,6 +120,11 @@ static struct bbdevice bbdevices[] = {
     {"MacBookPro18,2", 0, 0}, // MacBook Pro (M1 Max, 16-inch, 2021)
     {"MacBookPro18,3", 0, 0}, // MacBook Pro (M1 Pro, 14-inch, 2021)
     {"MacBookPro18,4", 0, 0}, // MacBook Pro (M1 Max, 14-inch, 2021)
+    {"Mac13,1", 0, 0}, // Mac Studio (M1 Max, 2022)
+    {"Mac13,2", 0, 0}, // Mac Studio (M1 Ultra, 2022)
+    
+    // Apple Displays
+    {"AppleDisplay2,1", 0, 0}, // Studio Display
     
     // Apple T2 Coprocessor
     {"iBridge2,1", 0, 0}, // Apple T2 iMacPro1,1 (j137)
@@ -161,7 +167,7 @@ static struct bbdevice bbdevices[] = {
     {"iPhone7,2",  3840149528, 4},  // iPhone 6
     {"iPhone8,1",  3840149528, 4},  // iPhone 6s
     {"iPhone8,2",  3840149528, 4},  // iPhone 6s Plus
-    {"iPhone8,4",  3840149528, 4},  // iPhone SE
+    {"iPhone8,4",  3840149528, 4},  // iPhone SE (1st gen)
     {"iPhone9,1",  2315222105, 4},  // iPhone 7 (Global)
     {"iPhone9,2",  2315222105, 4},  // iPhone 7 Plus (Global)
     {"iPhone9,3",  1421084145, 12}, // iPhone 7 GSM
@@ -179,7 +185,7 @@ static struct bbdevice bbdevices[] = {
     {"iPhone12,1", 524245983, 12},  // iPhone 11
     {"iPhone12,3", 524245983, 12},  // iPhone 11 Pro
     {"iPhone12,5", 524245983, 12},  // iPhone 11 Pro Max
-    {"iPhone12,8", 524245983, 12},  // iPhone SE (2020)
+    {"iPhone12,8", 524245983, 12},  // iPhone SE (2nd gen)
     {"iPhone13,1", 3095201109, 4},  // iPhone 12 mini
     {"iPhone13,2", 3095201109, 4},  // iPhone 12
     {"iPhone13,3", 3095201109, 4},  // iPhone 12 Pro
@@ -188,6 +194,7 @@ static struct bbdevice bbdevices[] = {
     {"iPhone14,3", 495958265, 4},  // iPhone 13 Pro
     {"iPhone14,4", 495958265, 4},  // iPhone 13 mini
     {"iPhone14,5", 495958265, 4},  // iPhone 13
+    {"iPhone14,6", 2241363181, 4},  // iPhone SE (3rd gen)
     
     // iPads
     {"iPad1,1",  0, 0},          // iPad (1st gen)
@@ -239,6 +246,8 @@ static struct bbdevice bbdevices[] = {
     {"iPad11,4", 165673526, 12}, // iPad Air (3rd gen, Cellular)
     {"iPad13,1", 0, 0},          // iPad Air (4th gen, Wi-Fi)
     {"iPad13,2", 524245983, 12}, // iPad Air (4th gen, Cellular)
+    {"iPad13,16", 0, 0},          // iPad Air (5th gen, Wi-Fi)
+    {"iPad13,17", 495958265, 4}, // iPad Air (5th gen, Cellular)
     
     // iPad Pros
     {"iPad6,3",    0, 0},            // iPad Pro (9.7-inch, Wi-Fi)
@@ -524,7 +533,7 @@ malloc_rets:
                     }
                 }
                 
-                info("[TSSC] got firmwareurl for iOS %.*s build %.*s\n",(int)i_vers->size, i_vers->value,(int)i_build->size, i_build->value);
+                info("[TSSC] got firmwareurl for %.*s build %.*s\n",(int)i_vers->size, i_vers->value,(int)i_build->size, i_build->value);
                 rets->version = (char*)malloc(i_vers->size+1);
                 memcpy(rets->version, i_vers->value, i_vers->size);
                 rets->version[i_vers->size] = '\0';
@@ -1038,15 +1047,20 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
         plist_get_uint_val(pecid, &devVals->ecid);
         char *cecid = ecid_to_string(devVals->ecid);
         
-        uint32_t size = 0;
-        char* data = NULL;
         if (*devVals->generator)
             plist_dict_set_item(apticket, "generator", plist_new_string(devVals->generator));
         if (apticket2)
             plist_dict_set_item(apticket, "updateInstall", apticket2);
         if (apticket3)
             plist_dict_set_item(apticket, "noNonce", apticket3);
-        plist_to_xml(apticket, &data, &size);
+        
+        uint32_t size = 0;
+        char* data = NULL;
+        
+        if (save_bplist)
+            plist_to_bin(apticket, &data, &size);
+        else
+            plist_to_xml(apticket, &data, &size);
         
         char *apnonce = "";
         size_t apnonceLen = 0;
@@ -1066,7 +1080,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
         snprintf(tmpDevicename, tmpDeviceNameSize, "%s", devVals->deviceModel);
         if (devVals->deviceBoard) snprintf(tmpDevicename+strlen(tmpDevicename), tmpDeviceNameSize-strlen(tmpDevicename), "_%s",devVals->deviceBoard);
         
-        size_t fnamelen = strlen(shshSavePath) + 1 + strlen(cecid) + tmpDeviceNameSize + strlen(cpvers) + strlen(cbuild) + strlen(DIRECTORY_DELIMITER_STR"___-.shsh2") + 1;
+        size_t fnamelen = strlen(shshSavePath) + 1 + strlen(cecid) + tmpDeviceNameSize + strlen(cpvers) + strlen(cbuild) + strlen(DIRECTORY_DELIMITER_STR"___-.bshsh2") + 1;
         fnamelen += devVals->parsedApnonceLen*2;
         
         char *fname = malloc(fnamelen);
@@ -1074,14 +1088,11 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
         size_t prePathLen= strlen(shshSavePath);
         if (shshSavePath[prePathLen-1] == DIRECTORY_DELIMITER_CHR) prePathLen--;
         strncpy(fname, shshSavePath, prePathLen);
-        
-        snprintf(fname+prePathLen, fnamelen, DIRECTORY_DELIMITER_STR"%s_%s_%s-%s_%s.shsh%s",cecid,tmpDevicename,cpvers,cbuild, apnonce, (*devVals->generator || apticket2) ? "2" : "");
-        
-        
+        snprintf(fname+prePathLen, fnamelen, DIRECTORY_DELIMITER_STR"%s_%s_%s-%s_%s.%sshsh%s",cecid,tmpDevicename,cpvers,cbuild, apnonce, save_bplist ? "b" : "", (*devVals->generator || apticket2) ? "2" : "");
         FILE *shshfile = fopen(fname, "wb");
         if (!shshfile) error("[Error] can't save shsh at %s\n",fname);
         else{
-            fwrite(data, strlen(data), 1, shshfile);
+            fwrite(data, size, 1, shshfile);
             fclose(shshfile);
             info("Saved shsh blobs!\n");
         }
@@ -1192,7 +1203,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
             
             isSigned = (isSignedOne > 0 || isSigned > 0);
             if (buildManifest) (void)(free(buildManifest)), buildManifest = NULL;
-            info("Firmware version %s %s %s signed!\n",u->version,u->buildID,isSignedOne ? "IS" : "IS NOT");
+            info("[INFO] Firmware version %s %s %s being signed.\n",u->version,u->buildID,isSignedOne ? "is" : "isn't");
         }
         (void)(free(u->url)),u->url = NULL;
         (void)(free(u->buildID)),u->buildID = NULL;

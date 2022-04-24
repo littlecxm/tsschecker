@@ -25,7 +25,7 @@
 #include "tsschecker.h"
 #include "all.h"
 
-#define FLAG_LIST_IOS       (1 << 0)
+#define FLAG_LIST_VERSIONS       (1 << 0)
 #define FLAG_LIST_DEVICES   (1 << 1)
 #define FLAG_BUILDMANIFEST  (1 << 2)
 #define FLAG_LATEST_IOS     (1 << 3)
@@ -48,7 +48,7 @@ static struct option longopts[] = {
     { "buildid",            required_argument, NULL, 'Z' },
     { "debug",              no_argument,       NULL,  0  },
     { "list-devices",       no_argument,       NULL,  1  },
-    { "list-ios",           no_argument,       NULL,  2  },
+    { "list-versions",      no_argument,       NULL,  2  },
     { "save-path",          required_argument, NULL,  3  },
     { "print-tss-request",  no_argument,       NULL,  4  },
     { "print-tss-response", no_argument,       NULL,  5  },
@@ -59,6 +59,7 @@ static struct option longopts[] = {
     { "raw",                required_argument, NULL, 10  },
     { "bbsnum",             required_argument, NULL, 11  },
     { "server-url",         required_argument, NULL, 12  },
+    { "bplist",             no_argument,       NULL, 13  },
     { "generator",          required_argument, NULL, 'g' },
     { NULL, 0, NULL, 0 }
 };
@@ -68,8 +69,8 @@ void cmd_help(){
     printf("Usage: tsschecker [OPTIONS]\n\n");
     printf("  -h, --help\t\t\tprints usage information\n");
     printf("  -d, --device MODEL\t\tspecify device by its model (eg. iPhone10,3)\n");
-    printf("  -i, --ios VERSION\t\tspecify firmware version (eg. 14.7.1)\n");
-    printf("  -Z  --buildid BUILD\t\tspecify buildid instead of firmware version (eg. 18G82)\n");
+    printf("  -i, --ios VERSION\t\tspecify firmware version (eg. 15.4.1)\n");
+    printf("  -Z  --buildid BUILD\t\tspecify buildid instead of firmware version (eg. 19E258)\n");
     printf("  -B, --boardconfig BOARD \tspecify boardconfig instead of device model (eg. d22ap)\n");
     printf("  -o, --ota\t\t\tcheck OTA signing status, instead of normal restore\n");
     printf("  -b, --no-baseband\t\tdon't check baseband signing status. Request tickets without baseband\n");
@@ -81,14 +82,15 @@ void cmd_help(){
     printf("  -e, --ecid ECID\t\tmanually specify ECID to be used for fetching blobs, instead of using random ones\n");
     printf("                 \t\tECID must be either DEC or HEX eg. 5482657301265 or 0xab46efcbf71\n");
     printf("  -g, --generator GEN\t\tmanually specify generator in HEX format 16 in length (eg. 0x1111111111111111)\n\n");
-    printf("      --apnonce NONCE\t\tmanually specify ApNonce instead of using random ones\n\t\t\t\t(required for saving blobs for A12/S4 and newer devices with generator)\n\n");
+    printf("      --apnonce NONCE\t\tmanually specify ApNonce instead of using random ones\n\t\t\t\t(required when saving blobs for arm64e devices with matching generator)\n\n");
     printf("      --sepnonce NONCE\t\tmanually specify SEP Nonce instead of using random ones (not required for saving blobs)\n");
     printf("      --bbsnum SNUM\t\tmanually specify BbSNUM in HEX to save valid BBTickets (not required for saving blobs)\n\n");
     printf("      --save-path PATH\t\tspecify output path for saving shsh blobs\n");
     printf("      --server-url URL\t\tmanually specify TSS server URL\n");
+    printf("      --bplist\t\t\tsave fetched blobs in a binary plist (.bshsh2 format)\n");
     printf("      --beta\t\t\trequest tickets for a beta instead of normal release (use with -o)\n");
-    printf("      --list-devices\t\tlist all known devices\n");
-    printf("      --list-ios\t\tlist all known firmware versions\n");
+    printf("      --list-devices\t\tlist known devices from firmwares.json\n");
+    printf("      --list-versions\t\tlist all known firmware versions for the specified device\n");
     printf("      --nocache \t\tignore caches and re-download required files\n");
     printf("      --print-tss-request\tprint the TSS request that will be sent to Apple\n");
     printf("      --print-tss-response\tprint the TSS response that comes from Apple\n");
@@ -157,6 +159,7 @@ int main(int argc, const char * argv[]) {
     dbglog = 1;
     idevicerestore_debug = 0;
     save_shshblobs = 0;
+    save_bplist = 0;
     int optindex = 0;
     int opt = 0;
     long flags = 0;
@@ -250,8 +253,8 @@ int main(int argc, const char * argv[]) {
             case 1: // only long option: "list-devices"
                 flags |= FLAG_LIST_DEVICES;
                 break;
-            case 2: // only long option: "list-ios"
-                flags |= FLAG_LIST_IOS;
+            case 2: // only long option: "list-versions"
+                flags |= FLAG_LIST_VERSIONS;
                 break;
             case 3: // only long option: "save-path"
                 shshSavePath = optarg;
@@ -283,6 +286,9 @@ int main(int argc, const char * argv[]) {
                 break;
             case 12: // only long option: "server-url"
                 serverUrl = optarg;
+                break;
+            case 13: // only long option: "bplist"
+                save_bplist = 1;
                 break;
             default:
                 cmd_help();
@@ -416,14 +422,14 @@ int main(int argc, const char * argv[]) {
             free((char*)versVals.version);
             if (--versionCnt == 0) reterror(-9, "[TSSC] automatic firmware selection couldn't find non-beta firmware\n");
         }
-        info("[TSSC] selecting latest version of firmware: %s\n",versVals.version);
+        info("[TSSC] selecting latest version: %s\n",versVals.version);
         if (bpos) *bpos= '\0';
         if (versions) free(versions[versionCnt-1]),free(versions);
     }
     
     if (flags & FLAG_LIST_DEVICES) {
         printListOfDevices(firmwareTokens);
-    }else if (flags & FLAG_LIST_IOS){
+    }else if (flags & FLAG_LIST_VERSIONS){
         if (!devVals.deviceModel)
             reterror(-3,"[TSSC] please specify a device for this option\n\tuse -h for more help\n");
 
@@ -440,7 +446,7 @@ int main(int argc, const char * argv[]) {
             isSigned = isVersionSignedForDevice(firmwareTokens, &versVals, &devVals, serverUrl);
         }
         
-        if (isSigned >=0) printf("\n%s %s for device %s %s being signed!\n",(versVals.buildID) ? "Build" : "iOS" ,(versVals.buildID ? versVals.buildID : versVals.version),devVals.deviceModel, (isSigned) ? "IS" : "IS NOT");
+        if (isSigned >=0) printf("\n%s %s for device %s %s being signed!\n",(versVals.buildID) ? "Build" : "Firmware version" ,(versVals.buildID ? versVals.buildID : versVals.version),devVals.deviceModel, (isSigned) ? "IS" : "is NOT");
         else{
             putchar('\n');
             reterror(-69, "[TSSC] checking tss status failed!\n");
