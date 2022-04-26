@@ -1006,7 +1006,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
     if (isSigned && save_shshblobs){
         if (!devVals->installType){
             plist_t tssreq2 = NULL;
-            info("also requesting APTicket for installType=Update\n");
+            info("[INFO] Also requesting an APTicket for installType=Update\n");
             devVals->installType = kInstallTypeUpdate;
             if (tssrequest(&tssreq2, buildManifestBuffer, devVals, basebandMode)){
                 warning("[TSSR] failed to build tssrequest for alternative installType\n");
@@ -1094,7 +1094,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
         else{
             fwrite(data, size, 1, shshfile);
             fclose(shshfile);
-            info("Saved shsh blobs!\n");
+            info("[INFO] Successfully saved SHSH blobs!\n");
         }
         
         if (apnonceLen) free(apnonce);
