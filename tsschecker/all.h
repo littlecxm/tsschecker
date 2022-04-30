@@ -9,6 +9,9 @@
 #ifndef all_h
 #define all_h
 
+#define TSSCHECKER_VERSION_MAJOR "0"
+#define TSSCHECKER_VERSION_PATCH "0"
+
 #ifdef DEBUG // this is for developing with Xcode
 #define TSSCHECKER_BUILD_TYPE "DEBUG"
 #define TSSCHECKER_VERSION_SHA "Build: " __DATE__ " " __TIME__ ""
