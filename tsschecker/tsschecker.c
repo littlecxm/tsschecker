@@ -120,20 +120,20 @@ static struct bbdevice bbdevices[] = {
     {"MacBookPro18,2", 0, 0}, // MacBook Pro (M1 Max, 16-inch, 2021)
     {"MacBookPro18,3", 0, 0}, // MacBook Pro (M1 Pro, 14-inch, 2021)
     {"MacBookPro18,4", 0, 0}, // MacBook Pro (M1 Max, 14-inch, 2021)
-    {"Mac13,1", 0, 0}, // Mac Studio (M1 Max, 2022)
-    {"Mac13,2", 0, 0}, // Mac Studio (M1 Ultra, 2022)
+    {"Mac13,1", 0, 0},        // Mac Studio (M1 Max, 2022)
+    {"Mac13,2", 0, 0},        // Mac Studio (M1 Ultra, 2022)
     
     // Apple Displays
     {"AppleDisplay2,1", 0, 0}, // Studio Display
     
     // Apple T2 Coprocessor
-    {"iBridge2,1", 0, 0}, // Apple T2 iMacPro1,1 (j137)
-    {"iBridge2,3", 0, 0}, // Apple T2 MacBookPro15,1 (j680)
-    {"iBridge2,4", 0, 0}, // Apple T2 MacBookPro15,2 (j132)
-    {"iBridge2,5", 0, 0}, // Apple T2 Macmini8,1 (j174)
-    {"iBridge2,6", 0, 0}, // Apple T2 MacPro7,1 (j160)
-    {"iBridge2,7", 0, 0}, // Apple T2 MacBookPro15,3 (j780)
-    {"iBridge2,8", 0, 0}, // Apple T2 MacBookAir8,1 (j140k)
+    {"iBridge2,1", 0, 0},  // Apple T2 iMacPro1,1 (j137)
+    {"iBridge2,3", 0, 0},  // Apple T2 MacBookPro15,1 (j680)
+    {"iBridge2,4", 0, 0},  // Apple T2 MacBookPro15,2 (j132)
+    {"iBridge2,5", 0, 0},  // Apple T2 Macmini8,1 (j174)
+    {"iBridge2,6", 0, 0},  // Apple T2 MacPro7,1 (j160)
+    {"iBridge2,7", 0, 0},  // Apple T2 MacBookPro15,3 (j780)
+    {"iBridge2,8", 0, 0},  // Apple T2 MacBookAir8,1 (j140k)
     {"iBridge2,10", 0, 0}, // Apple T2 MacBookPro15,4 (j213)
     {"iBridge2,12", 0, 0}, // Apple T2 MacBookAir8,2 (j140a)
     {"iBridge2,14", 0, 0}, // Apple T2 MacBookPro16,1 (j152f)
@@ -190,10 +190,10 @@ static struct bbdevice bbdevices[] = {
     {"iPhone13,2", 3095201109, 4},  // iPhone 12
     {"iPhone13,3", 3095201109, 4},  // iPhone 12 Pro
     {"iPhone13,4", 3095201109, 4},  // iPhone 12 Pro Max
-    {"iPhone14,2", 495958265, 4},  // iPhone 13 Pro Max
-    {"iPhone14,3", 495958265, 4},  // iPhone 13 Pro
-    {"iPhone14,4", 495958265, 4},  // iPhone 13 mini
-    {"iPhone14,5", 495958265, 4},  // iPhone 13
+    {"iPhone14,2", 495958265, 4},   // iPhone 13 Pro Max
+    {"iPhone14,3", 495958265, 4},   // iPhone 13 Pro
+    {"iPhone14,4", 495958265, 4},   // iPhone 13 mini
+    {"iPhone14,5", 495958265, 4},   // iPhone 13
     {"iPhone14,6", 2241363181, 4},  // iPhone SE (3rd gen)
     
     // iPads
@@ -234,7 +234,7 @@ static struct bbdevice bbdevices[] = {
     {"iPad11,1", 0, 0},          // iPad mini (5th gen, Wi-Fi)
     {"iPad11,2", 165673526, 12}, // iPad mini (5th gen, Cellular)
     {"iPad14,1", 0, 0},          // iPad mini (6th gen, Wi-Fi)
-    {"iPad14,2", 495958265, 4}, // iPad mini (6th gen, Cellular)
+    {"iPad14,2", 495958265, 4},  // iPad mini (6th gen, Cellular)
     
     // iPad Airs
     {"iPad4,1",  0, 0},          // iPad Air (Wi-Fi)
@@ -246,7 +246,7 @@ static struct bbdevice bbdevices[] = {
     {"iPad11,4", 165673526, 12}, // iPad Air (3rd gen, Cellular)
     {"iPad13,1", 0, 0},          // iPad Air (4th gen, Wi-Fi)
     {"iPad13,2", 524245983, 12}, // iPad Air (4th gen, Cellular)
-    {"iPad13,16", 0, 0},          // iPad Air (5th gen, Wi-Fi)
+    {"iPad13,16", 0, 0},         // iPad Air (5th gen, Wi-Fi)
     {"iPad13,17", 495958265, 4}, // iPad Air (5th gen, Cellular)
     
     // iPad Pros
