@@ -1006,7 +1006,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
     if (isSigned && save_shshblobs){
         if (!devVals->installType){
             plist_t tssreq2 = NULL;
-            info("[INFO] Also requesting an APTicket for installType=Update\n");
+            info("[TSSC] Also requesting an APTicket for installType=Update\n");
             devVals->installType = kInstallTypeUpdate;
             if (tssrequest(&tssreq2, buildManifestBuffer, devVals, basebandMode)){
                 warning("[TSSR] failed to build tssrequest for alternative installType\n");
@@ -1094,7 +1094,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
         else{
             fwrite(data, size, 1, shshfile);
             fclose(shshfile);
-            info("[INFO] Successfully saved SHSH blobs!\n");
+            info("[TSSC] Successfully saved SHSH blobs!\n");
         }
         
         if (apnonceLen) free(apnonce);
@@ -1203,7 +1203,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
             
             isSigned = (isSignedOne > 0 || isSigned > 0);
             if (buildManifest) (void)(free(buildManifest)), buildManifest = NULL;
-            info("[INFO] Firmware version %s build %s %s being signed.\n",u->version,u->buildID,isSignedOne ? "is" : "isn't");
+            info("[TSSC] Firmware version %s build %s %s being signed.\n",u->version,u->buildID,isSignedOne ? "is" : "isn't");
         }
         (void)(free(u->url)),u->url = NULL;
         (void)(free(u->buildID)),u->buildID = NULL;
