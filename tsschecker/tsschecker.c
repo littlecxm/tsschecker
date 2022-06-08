@@ -122,6 +122,8 @@ static struct bbdevice bbdevices[] = {
     {"MacBookPro18,4", 0, 0}, // MacBook Pro (M1 Max, 14-inch, 2021)
     {"Mac13,1", 0, 0},        // Mac Studio (M1 Max, 2022)
     {"Mac13,2", 0, 0},        // Mac Studio (M1 Ultra, 2022)
+    {"Mac14,2", 0, 0},        // MacBook Air (M2, 2022)
+    {"Mac14,7", 0, 0},        // MacBook Pro (13-inch, M2, 2022)
     
     // Apple Displays
     {"AppleDisplay2,1", 0, 0}, // Studio Display
