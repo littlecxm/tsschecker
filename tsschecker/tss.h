@@ -28,6 +28,7 @@
 extern "C" {
 #endif
 
+#include <libfragmentzip/libfragmentzip.h>
 #include <plist/plist.h>
 
 #include "debug.h"
@@ -35,7 +36,7 @@ extern "C" {
 extern int print_tss_request;
 
 /* parameters */
-int tss_parameters_add_from_manifest(plist_t parameters, plist_t build_identity);
+int tss_parameters_add_from_manifest(plist_t parameters, plist_t build_identity, bool include_manifest);
 
 /* request */
 plist_t tss_request_new_ota(plist_t overrides);
@@ -54,6 +55,7 @@ int tss_request_add_rose_tags(plist_t request, plist_t parameters, plist_t overr
 int tss_request_add_veridian_tags(plist_t request, plist_t parameters, plist_t overrides);
 int tss_request_add_tcon_tags(plist_t request, plist_t parameters, plist_t overrides);
 int tss_request_add_timer_tags(plist_t request, plist_t parameters, plist_t overrides);
+int tss_request_add_cryptex_tags(plist_t request, plist_t parameters, plist_t overrides);
 
 int tss_request_add_ap_img4_tags(plist_t request, plist_t parameters);
 int tss_request_add_ap_img3_tags(plist_t request, plist_t parameters);
