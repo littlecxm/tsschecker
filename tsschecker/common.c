@@ -33,13 +33,13 @@ void debug_plist(plist_t plist) {
     uint32_t size = 0;
     char* data = NULL;
     if(plist_to_xml(plist, &data, &size) != PLIST_ERR_SUCCESS) {
-        debug("Failed to convert plist data to xml!\n");
+        error("Failed to convert plist data to xml!\n");
         return;
     }
     if (size <= MAX_PRINT_LEN)
-        debug("%s:printing %i bytes plist:\n%s", __FILE__, size, data);
+        info("%s:printing %i bytes plist:\n%s", __FILE__, size, data);
     else
-        debug("%s:supressed printing %i bytes plist...\n", __FILE__, size);
+        info("%s:supressed printing %i bytes plist...\n", __FILE__, size);
     free(data);
 }
 #endif
