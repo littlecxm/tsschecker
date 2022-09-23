@@ -61,12 +61,12 @@ plist_t tss_request_new(plist_t overrides) {
     plist_dict_set_item(request, "@Locality", plist_new_string("en_US"));
     plist_dict_set_item(request, "@HostPlatformInfo",
 #ifdef WIN32
-            plist_new_string("windows")
+    plist_new_string("windows")
 #else
-                        plist_new_string("mac")
+    plist_new_string("mac")
 #endif
     );
-
+	plist_dict_set_item(request, "UID_MODE", plist_new_bool(0));
     plist_dict_set_item(request, "@VersionInfo", plist_new_string(TSS_CLIENT_VERSION_STRING));
     char* guid = generate_guid();
     if (guid) {
@@ -1438,12 +1438,12 @@ plist_t tss_request_send(plist_t tss_request, const char* server_url_string) {
     char curl_error_message[CURL_ERROR_SIZE];
 
     const char* urls[6] = {
-            "https://gs.apple.com/TSS/controller?action=2",
-            "https://17.171.36.30/TSS/controller?action=2",
-            "https://17.151.36.30/TSS/controller?action=2",
-            "http://gs.apple.com/TSS/controller?action=2",
-            "http://17.171.36.30/TSS/controller?action=2",
-            "http://17.151.36.30/TSS/controller?action=2"
+        "https://gs.apple.com/TSS/controller?action=2",
+        "https://17.171.36.30/TSS/controller?action=2",
+        "https://17.151.36.30/TSS/controller?action=2",
+        "http://gs.apple.com/TSS/controller?action=2",
+        "http://17.171.36.30/TSS/controller?action=2",
+        "http://17.151.36.30/TSS/controller?action=2"
     };
 
     plist_to_xml(tss_request, &request, &size);
@@ -1487,10 +1487,10 @@ plist_t tss_request_send(plist_t tss_request, const char* server_url_string) {
         } else {
             int url_index = (retry - 1) % 6;
             curl_easy_setopt(handle, CURLOPT_URL, urls[url_index]);
-            info("Request URL set to %s\n", urls[url_index]);
+            info("[TSSR] Request URL set to %s\n", urls[url_index]);
         }
 
-        info("Sending TSS request attempt %d... ", retry);
+        info("[TSSR] Sending TSS request attempt %d... ", retry);
 
         curl_easy_perform(handle);
         curl_slist_free_all(header);
@@ -1498,20 +1498,20 @@ plist_t tss_request_send(plist_t tss_request, const char* server_url_string) {
 
         if (strstr(response->content, "MESSAGE=SUCCESS")) {
             status_code = 0;
-            info("response successfully received\n");
+            info("success\n");
             break;
+        } else {
+            info("failure\n");
         }
-
-        if (response->length > 0) {
-            tsserror("TSS server returned: %s\n", response->content);
-        }
-
+        
+        if (response->length > 0) {}
+        
         char* status = strstr(response->content, "STATUS=");
         if (status) {
             sscanf(status+7, "%d&%*s", &status_code);
         }
         if (status_code == -1) {
-            tsserror("%s\n", curl_error_message);
+            error("%s\n", curl_error_message);
             // no status code in response. retry
             free(response->content);
             free(response);
@@ -1531,23 +1531,23 @@ plist_t tss_request_send(plist_t tss_request, const char* server_url_string) {
             // server error, most likely the request was malformed
             break;
         } else if (status_code == 126) {
-            // An internal error occured, most likely the request was malformed
+            // An internal error occurred, most likely the request was malformed
             break;
             /* FIXME: fully fix 128 error; now it's ignored */
         } else if (status_code == 128) {
-            // Error that occurs when TSS request on certain devices
+            // ignoring an error that occurs with tss requests on certain devices
             break;
         } else {
-            tsserror("ERROR: tss_send_request: Unhandled status code %d\n", status_code);
+            error("ERROR: tss_send_request: Unhandled status code %d\n", status_code);
         }
     }
 
     if (status_code != 0) {
         if (response && strstr(response->content, "MESSAGE=") != NULL) {
             char* message = strstr(response->content, "MESSAGE=") + strlen("MESSAGE=");
-            tsserror("ERROR: TSS request failed (status=%d, message=%s)\n", status_code, message);
+            error("TSS server returned: (status=%d, message=%s)\n", status_code, message);
         } else {
-            tsserror("ERROR: TSS request failed: %s (status=%d)\n", curl_error_message, status_code);
+            error("TSS server returned: %s (status=%d)\n", curl_error_message, status_code);
         }
         free(request);
         if (response) free(response->content);
@@ -1796,17 +1796,15 @@ char* tss_request_send_raw(char* request, const char* server_url_string, int* re
         } else {
             info("failure\n");
         }
-
-        if (response->length > 0) {
-            tsserror("TSS server returned: %s\n", response->content);
-        }
+        
+        if (response->length > 0) {}
 
         char* status = strstr(response->content, "STATUS=");
         if (status) {
             sscanf(status+7, "%d&%*s", &status_code);
         }
         if (status_code == -1) {
-            tsserror("%s\n", curl_error_message);
+            error("%s\n", curl_error_message);
             // no status code in response. retry
             free(response->content);
             free(response);
@@ -1828,11 +1826,12 @@ char* tss_request_send_raw(char* request, const char* server_url_string, int* re
         } else if (status_code == 126) {
             // An internal error occurred, most likely the request was malformed
             break;
+            /* FIXME: fully fix 128 error; now it's ignored */
         } else if (status_code == 128) {
-            // ignoring error that occurs when saving blobs on certain A8(X) devices and earlier
+            // ignoring an error that occurs with tss requests on certain devices
             break;
         } else {
-            tsserror("ERROR: tss_send_request: Unhandled status code %d\n", status_code);
+            error("ERROR: tss_send_request: Unhandled status code %d\n", status_code);
         }
     }
 
