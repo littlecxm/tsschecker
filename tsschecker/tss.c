@@ -66,7 +66,6 @@ plist_t tss_request_new(plist_t overrides) {
     plist_new_string("mac")
 #endif
     );
-	plist_dict_set_item(request, "UID_MODE", plist_new_bool(0));
     plist_dict_set_item(request, "@VersionInfo", plist_new_string(TSS_CLIENT_VERSION_STRING));
     char* guid = generate_guid();
     if (guid) {
@@ -239,6 +238,11 @@ int tss_parameters_add_from_manifest(plist_t parameters, plist_t build_identity,
     _plist_dict_copy_item(parameters, build_identity, "Cryptex1,MobileAssetBrainVolume", NULL);
     _plist_dict_copy_item(parameters, build_identity, "Cryptex1,MobileAssetBrainTrustCache", NULL);
 
+    node = plist_dict_get_item(build_identity, "Info");
+	if (node) {
+		_plist_dict_copy_bool(parameters, node, "RequiresUIDMode", NULL);
+	}
+
     if (include_manifest) {
         /* add build identity manifest dictionary */
         node = plist_dict_get_item(build_identity, "Manifest");
@@ -285,6 +289,13 @@ int tss_request_add_ap_img4_tags(plist_t request, plist_t parameters)
     _plist_dict_copy_data(request, parameters, "SepNonce", "ApSepNonce");
     _plist_dict_copy_uint(request, parameters, "NeRDEpoch", NULL);
     _plist_dict_copy_data(request, parameters, "PearlCertificationRootPub", NULL);
+
+    if (plist_dict_get_item(parameters, "UID_MODE")) {
+		_plist_dict_copy_item(request, parameters, "UID_MODE", NULL);
+	} else if (_plist_dict_get_bool(parameters, "RequiresUIDMode")) {
+		// The logic here is missing why this value is expected to be 'false'
+		plist_dict_set_item(request, "UID_MODE", plist_new_bool(0));
+	}
 
     return 0;
 }
@@ -1067,9 +1078,28 @@ int tss_request_add_vinyl_tags(plist_t request, plist_t parameters, plist_t over
     plist_dict_set_item(request, "@BBTicket", plist_new_bool(1));
     plist_dict_set_item(request, "@eUICC,Ticket", plist_new_bool(1));
 
+    _plist_dict_copy_bool(request, parameters, "eUICC,ApProductionMode", "ApProductionMode");
     _plist_dict_copy_uint(request, parameters, "eUICC,ChipID", NULL);
     _plist_dict_copy_data(request, parameters, "eUICC,EID", NULL);
     _plist_dict_copy_data(request, parameters, "eUICC,RootKeyIdentifier", NULL);
+
+    if (!plist_dict_get_item(request, "eUICC,Gold")) {
+		plist_t n = plist_access_path(parameters, 2, "Manifest", "eUICC,Gold");
+		if (n) {
+			plist_t p = plist_new_dict();
+			_plist_dict_copy_data(p, n, "Digest", NULL);
+			plist_dict_set_item(request, "eUICC,Gold", p);
+		}
+	}
+
+	if (!plist_dict_get_item(request, "eUICC,Main")) {
+		plist_t n = plist_access_path(parameters, 2, "Manifest", "eUICC,Main");
+		if (n) {
+			plist_t p = plist_new_dict();
+			_plist_dict_copy_data(p, n, "Digest", NULL);
+			plist_dict_set_item(request, "eUICC,Main", p);
+		}
+	}
 
     /* set Nonce for eUICC,Gold component */
     node = plist_dict_get_item(parameters, "EUICCGoldNonce");
