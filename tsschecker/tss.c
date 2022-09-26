@@ -1563,10 +1563,14 @@ plist_t tss_request_send(plist_t tss_request, const char* server_url_string) {
             break;
             /* FIXME: fully fix 128 error; now it's ignored */
         } else if (status_code == 128) {
-            // ignoring an error that occurs with tss requests on certain devices
+            // ignoring an error that occurs with noNonce tss requests on certain devices.
+            break;
+            /* FIXME: fully fix 456 error; now it's ignored */
+        } else if (status_code == 456) {
+            // ignoring an error that occurs with noNonce tss requests on the iPhone 14 Pro models.
             break;
         } else {
-            error("ERROR: tss_send_request: Unhandled status code %d\n", status_code);
+            error("tss_send_request: Unhandled status code %d\n", status_code);
         }
     }
 
@@ -1856,19 +1860,23 @@ char* tss_request_send_raw(char* request, const char* server_url_string, int* re
             break;
             /* FIXME: fully fix 128 error; now it's ignored */
         } else if (status_code == 128) {
-            // ignoring an error that occurs with tss requests on certain devices
+            // ignoring an error that occurs with noNonce tss requests on certain devices
+            break;
+            /* FIXME: fully fix 456 error; now it's ignored */
+        } else if (status_code == 456) {
+            // ignoring an error that occurs with noNonce tss requests on the iPhone 14 Pro models.
             break;
         } else {
-            error("ERROR: tss_send_request: Unhandled status code %d\n", status_code);
+            error("tss_send_request: Unhandled status code %d\n", status_code);
         }
     }
 
     if (status_code != 0) {
         if (response && strstr(response->content, "MESSAGE=") != NULL) {
             char* message = strstr(response->content, "MESSAGE=") + strlen("MESSAGE=");
-            tsserror("ERROR: TSS request failed (status=%d, message=%s)\n", status_code, message);
+            error("TSS request failed (status=%d, message=%s)\n", status_code, message);
         } else {
-            tsserror("ERROR: TSS request failed: %s (status=%d)\n", curl_error_message, status_code);
+            error("TSS request failed: %s (status=%d)\n", curl_error_message, status_code);
         }
         free(request);
         if (response)
