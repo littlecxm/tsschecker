@@ -265,8 +265,7 @@ int tss_request_add_ap_img4_tags(plist_t request, plist_t parameters)
     _plist_dict_copy_string(request, parameters, "Ap,OSLongVersion", NULL);
 
     if (_plist_dict_copy_data(request, parameters, "ApNonce", NULL) < 0) {
-        tsserror("ERROR: Unable to find required ApNonce in parameters\n");
-        return -1;
+        plist_dict_set_item(request, "ApNonce", plist_new_data(NULL, 0));
     }
 
     plist_dict_set_item(request, "@ApImg4Ticket", plist_new_bool(1));
@@ -308,8 +307,7 @@ int tss_request_add_ap_img3_tags(plist_t request, plist_t parameters)
     }
 
     if (_plist_dict_copy_data(request, parameters, "ApNonce", NULL) < 0) {
-        tsserror("ERROR: Unable to find required ApNonce in parameters\n");
-        return -1;
+        plist_dict_set_item(request, "ApNonce", plist_new_data(NULL, 0));
     }
 
     plist_dict_set_item(request, "@APTicket", plist_new_bool(1));
