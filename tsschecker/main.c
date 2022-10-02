@@ -327,7 +327,7 @@ int main(int argc, const char * argv[]) {
             if ((tmp = (char*)getModelFromBoardconfig(devVals.deviceBoard)))
                 devVals.deviceModel = strdup(tmp);
             else
-                reterror(-25, "[TSSC] If you using --boardconfig, please also specify device model with -d.\n");
+                reterror(-25, "[TSSC] If you are using --boardconfig, please also specify a device model with -d.\n");
         }
     }
     

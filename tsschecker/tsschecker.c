@@ -1015,7 +1015,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
     plist_t apticket3 = NULL;
     
     if (tssrequest(&tssreq, buildManifestBuffer, devVals, basebandMode))
-        reterror("[TSSR] Failed to build the tss request\n");
+        reterror("[TSSR] Failed to build the tss request.\n");
 
     isSigned = ((apticket = tss_request_send(tssreq, server_url_string)) > 0);
     
