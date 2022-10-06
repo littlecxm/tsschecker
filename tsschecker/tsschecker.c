@@ -1190,7 +1190,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
 #define reterror(a ... ) {error(a); goto error;}
     int nocacheorig = nocache;
     if (versVals->version && atoi(versVals->version) <= 3) {
-        info("[TSSC] Version to check \"%s\" seems to be iOS 3 or lower, which did not require SHSH blobs.\n\[TSSC] Skipping checks and returning true.\n",versVals->version);
+        info("[TSSC] Version to check \"%s\" seems to be iOS 3 or lower, which did not require SHSH blobs.\n[TSSC] Skipping checks and returning true.\n",versVals->version);
         return 1;
     }
     
