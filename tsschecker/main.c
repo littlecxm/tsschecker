@@ -327,7 +327,7 @@ int main(int argc, const char * argv[]) {
             if ((tmp = (char*)getModelFromBoardconfig(devVals.deviceBoard)))
                 devVals.deviceModel = strdup(tmp);
             else
-                reterror(-25, "[TSSC] If you are using --boardconfig, please also specify a device model with -d.\n");
+                reterror(-25, "[TSSC] Unrecognized boardconfig!\n[TSSC] If you are using --boardconfig for an unknown device, try also specifying the device model with -d.\n");
         }
     }
     
@@ -415,7 +415,7 @@ int main(int argc, const char * argv[]) {
         int i = 0;
             
         char **versions = getListOfiOSForDevice(firmwareTokens, devVals.deviceModel, versVals.isOta, &versionCnt);
-        if (!versionCnt) reterror(-8, "[TSSC] Failed finding the latest firmware version. If you using --boardconfig, please also specify device model with -d ota=%d.\n",versVals.isOta);
+        if (!versionCnt) reterror(-8, "[TSSC] Failed finding the latest firmware version.  ota=%d\n[TSSC] If you are using --boardconfig for an unknown device, try also specifying the device model with -d.\n",versVals.isOta);
         char *bpos = NULL;
         while((bpos = strstr(versVals.version = strdup(versions[i++]),"[B]")) != 0){
             if (versVals.useBeta) break;
@@ -431,7 +431,7 @@ int main(int argc, const char * argv[]) {
         printListOfDevices(firmwareTokens);
     }else if (flags & FLAG_LIST_VERSIONS){
         if (!devVals.deviceModel)
-            reterror(-3,"[TSSC] Please specify a device for this option\n\tuse -h for more help.\n");
+            reterror(-3,"[TSSC] Please specify a device for this option, use -h for more help.\n");
 
         printListOfiOSForDevice(firmwareTokens, devVals.deviceModel, versVals.isOta);
     }else{
@@ -441,12 +441,12 @@ int main(int argc, const char * argv[]) {
 
         }else{
             if (!devVals.deviceModel) reterror(-3,"[TSSC] Please specify a device for this option\n\tuse -h for more help.\n");
-            if (!versVals.version && !versVals.buildID) reterror(-5,"[TSSC] Please specify a firmware version or build number for this option\n\tuse -h for more help.\n");
+            if (!versVals.version && !versVals.buildID) reterror(-5,"[TSSC] Please specify a firmware version or build number for this option, use -h for more help.\n");
             
             isSigned = isVersionSignedForDevice(firmwareTokens, &versVals, &devVals, serverUrl);
         }
         
-        if (isSigned >=0) printf("\n%s %s for device %s %s being signed!\n",(versVals.buildID) ? "Build" : "Firmware version" ,(versVals.buildID ? versVals.buildID : versVals.version),devVals.deviceModel, (isSigned) ? "IS" : "is NOT");
+        if (isSigned >=0) printf("\n%s %s for this device (%s) %s being signed!\n",(versVals.buildID) ? "Build" : "Firmware version" ,(versVals.buildID ? versVals.buildID : versVals.version),devVals.deviceModel, (isSigned) ? "IS" : "is NOT");
         else{
             putchar('\n');
             reterror(-69, "[TSSC] Checking TSS status failed!\n");

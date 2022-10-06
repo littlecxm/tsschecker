@@ -73,7 +73,7 @@ static const char *win_path_get(enum paths path){
     }
     
     error("DEBUG: tmp=%s win_paths[path]=%s\n",tmp,win_paths[path]);
-    error("FATAL could not get TMP path. exiting!\n");
+    error("Could not get TMP path. exiting!\n");
     exit(123);
     return NULL;
 }
@@ -387,7 +387,7 @@ const char *getBoardconfigFromModel(const char *model){
     while (table->product_type){
         if (strcasecmp(model, table->product_type) == 0){
             if (rt){
-                warning("Can't unambiguously map model to boardconfig for device %s!\n",model);
+                warning("[TSSC] Can't unambiguously map model to boardconfig for device (%s)!\n",model);
                 return NULL;
             }else
                 rt = table->hardware_model;
@@ -407,7 +407,7 @@ const char *getModelFromBoardconfig(const char *boardconfig){
     while (table->product_type){
         if (strcasecmp(boardconfig, table->hardware_model) == 0){
             if (rt){
-                warning("Can't unambiguously map boardconfig to model for device %s!\n",boardconfig);
+                warning("[TSSC] Can't unambiguously map boardconfig to model for device (%s)!\n",boardconfig);
                 return NULL;
             }else
                 rt = table->product_type;
@@ -423,7 +423,7 @@ plist_t getBuildidentityWithBoardconfig(plist_t buildManifest, const char *board
     plist_t selected_build_identity = NULL;
     plist_t buildidentities = plist_dict_get_item(buildManifest, "BuildIdentities");
     if (!buildidentities || plist_get_node_type(buildidentities) != PLIST_ARRAY){
-        error("[TSSR] Could not get BuildIdentities.\n");
+        error("[TSSR] Could not get BuildIdentities!\n");
         return NULL;
     }
     
@@ -477,7 +477,7 @@ plist_t getBuildidentity(plist_t buildManifest, const char *model, int isUpdateI
     
     const char *boardconfig = getBoardconfigFromModel(model);
     if (!boardconfig)
-        reterror("[TSSR] Can't find the boardconfig for device=%s please manually use --boardconfig.\n",model);
+        reterror("[TSSR] Can't find the boardconfig for %s, please use --boardconfig.\n",model);
     
     rt = getBuildidentityWithBoardconfig(buildManifest, boardconfig, isUpdateInstall);
     
@@ -508,7 +508,7 @@ t_versionURL *getFirmwareUrls(const char *deviceModel, t_iosVersion *versVals, j
     const char *versstring = (versVals->buildID) ? versVals->buildID : versVals->version;
     
     if (!firmwares)
-        return error("[TSSC] Device '%s' could not be found in devicelist\n", deviceModel), NULL;
+        return error("[TSSC] The specified device (%s) could not be found in the device list!\n", deviceModel), NULL;
     
 malloc_rets:
     if (retcounter)
@@ -548,7 +548,7 @@ malloc_rets:
                     }
                 }
                 
-                info("[TSSC] Got the Firmware URL for %.*s build %.*s.\n",(int)i_vers->size, i_vers->value,(int)i_build->size, i_build->value);
+                info("[TSSC] Got the firmware URL for version %.*s build %.*s.\n",(int)i_vers->size, i_vers->value,(int)i_build->size, i_build->value);
                 rets->version = (char*)malloc(i_vers->size+1);
                 memcpy(rets->version, i_vers->value, i_vers->size);
                 rets->version[i_vers->size] = '\0';
@@ -590,7 +590,7 @@ int downloadPartialzip(const char *url, const char *file, const char *dst){
     log("[LFZP] Downloading %s from: %s\n",file,url);
     fragmentzip_t *info = fragmentzip_open(url);
     if (!info) {
-        error("[LFZP] Failed to open url\n");
+        error("[LFZP] Failed to open URL!\n");
         return -1;
     }
     int ret = fragmentzip_download_file(info, file, dst, fragmentzip_callback);
@@ -753,7 +753,7 @@ int tss_populate_basebandvals(plist_t tssreq, plist_t tssparameters, int64_t BbG
     
     /* BasebandFirmware */
     if (tss_request_add_baseband_tags(tssreq, parameters, NULL) < 0) {
-        reterror("[TSSR] Failed to add baseband tags to TSS request\n");
+        reterror("[TSSR] Failed to add baseband tags to the TSS request!\n");
     }
     
 error:
@@ -799,7 +799,7 @@ int parseHex(const char *nonce, size_t *parsedLen, char *ret, size_t *retSize){
 int tss_populate_random(plist_t tssreq, int is64bit, t_devicevals *devVals){
     size_t nonceLen = 32; //valid for all devices with KTRR
     if (!devVals->deviceModel)
-        return error("[TSSR] Internal error: devVals->deviceModel is missing\n"),-1;
+        return error("[TSSR] Internal error: devVals->deviceModel is missing!\n"),-1;
 
     if (strncasecmp(devVals->deviceModel, "AudioAccessory1,", strlen("AudioAccessory1,")) == 0 ||
             strncasecmp(devVals->deviceModel, "AppleTV2,", strlen("AppleTV2,")) == 0 ||
@@ -878,7 +878,7 @@ int tss_populate_random(plist_t tssreq, int is64bit, t_devicevals *devVals){
             SHA384(zz, 8, genHash);
             memcpy(devVals->apnonce, genHash, 32);
         }else{
-            return error("[TSSR] Automatic generator->nonce calculation failed. Unknown device with noncelen=%u\n",(unsigned int)nonceLen),-1;
+            return error("[TSSR] Automatic generator->nonce calculation failed! Unknown device with noncelen=%u\n",(unsigned int)nonceLen),-1;
         }
     }
     
@@ -917,41 +917,42 @@ getID0:
                 ? getBuildidentityWithBoardconfig(manifest, devVals->deviceBoard, devVals->isUpdateInstall)
                 : getBuildidentity(manifest, devVals->deviceModel, devVals->isUpdateInstall);
     if (!id0 && !devVals->installType){
-        warning("[TSSC] Could not get the BuildIdentity for installType=Erase. Using fallback installType=Update since user did not specify installType manually!\n");
+        warning("[TSSC] Could not get the BuildIdentity for installType=Erase!\n");
+		warning("[TSSC] Using fallback installType=Update since user did not specify installType manually!\n");
 
         devVals->installType = kInstallTypeUpdate;
         goto getID0;
     }
     
     if (!id0 || plist_get_node_type(id0) != PLIST_DICT){
-        reterror("[TSSR] Could not get BuildIdentity for installType=%s\n",devVals->isUpdateInstall ? "Update" : "Erase");
+        reterror("[TSSR] Could not get the BuildIdentity for installType=%s!\n",devVals->isUpdateInstall ? "Update" : "Erase");
     }
     plist_t manifestdict = plist_dict_get_item(id0, "Manifest");
     if (!manifestdict || plist_get_node_type(manifestdict) != PLIST_DICT){
-        reterror("[TSSR] Could not get the BuildManifest.\n");
+        reterror("[TSSR] Could not get the BuildManifest!\n");
     }
     plist_t sep = plist_dict_get_item(manifestdict, "SEP");
     int is64Bit = !(!sep || plist_get_node_type(sep) != PLIST_DICT);
     
     if (tss_populate_random(tssparameter,is64Bit,devVals))
-        reterror("[TSSR] Failed to populate the tss request.\n");
+        reterror("[TSSR] Failed to populate the tss request!\n");
     
     tss_parameters_add_from_manifest(tssparameter, id0, true);
     if (tss_request_add_common_tags(tssreq, tssparameter, NULL) < 0) {
-        reterror("[TSSR] Unable to add common tags to the TSS request.\n");
+        reterror("[TSSR] Unable to add common tags to the TSS request!\n");
     }
     
     if (tss_request_add_ap_tags(tssreq, tssparameter, NULL) < 0) {
-        reterror("[TSSR] Unable to add common tags to the TSS request.\n");
+        reterror("[TSSR] Unable to add common tags to the TSS request!\n");
     }
     
     if (is64Bit) {
         if (tss_request_add_ap_img4_tags(tssreq, tssparameter) < 0) {
-            reterror("[TSSR] Unable to add img4 tags to the TSS request.\n");
+            reterror("[TSSR] Unable to add img4 tags to the TSS request!\n");
         }
     } else {
         if (tss_request_add_ap_img3_tags(tssreq, tssparameter) < 0) {
-            reterror("[TSSR] Unable to add img3 tags to the TSS request.\n");
+            reterror("[TSSR] Unable to add img3 tags to the TSS request!\n");
         }
     }
     if (plist_dict_get_item(tssreq, "Savage,BE-Dev-Patch"))
@@ -977,24 +978,24 @@ getID0:
         int64_t BbGoldCertId = devVals->bbgcid ? devVals->bbgcid : bbinfo->bbgcid;
         size_t bbsnumSize = devVals->bbsnumSize ? devVals->bbsnumSize : bbinfo->bbsnumSize;
         if (BbGoldCertId != bbinfo->bbgcid || bbsnumSize != bbinfo->bbsnumSize) {
-            info("\n[TSSR] Found undocumented baseband\n\n",
+            info("\n[TSSR] Found an undocumented baseband!\n\n",
                  devVals->deviceBoard, devVals->deviceModel, BbGoldCertId, bbsnumSize);
         }
         
         if (BbGoldCertId == -1) {
             if (basebandMode == kBasebandModeOnlyBaseband){
-                reterror("[TSSR] Failed to get BasebandGoldCertID, but requested to get only baseband ticket. Aborting here!\n");
+                reterror("[TSSR] Could not get the BasebandGoldCertID, but user specified to request only baseband tickets. Aborting!\n");
             }
-            warning("[TSSR] There was an error getting the BasebandGoldCertID, continuing without requesting Baseband ticket!\n");
+            warning("[TSSR] There was an error getting the BasebandGoldCertID, skipping baseband TSS requests.\n");
         }else if (BbGoldCertId) {
             if (tss_populate_basebandvals(tssreq, tssparameter, BbGoldCertId, devVals->bbsnum, bbsnumSize) < 0) {
-                reterror("[TSSR] Failed to populate baseband values\n");
+                reterror("[TSSR] Failed to populate baseband values!\n");
             }
         }else{
-            log("[TSSR] LOG: device %s doesn't need a baseband ticket, continuing without requesting a Baseband ticket\n",devVals->deviceModel);
+            log("[TSSR] This device (%s) does not use a baseband modem, skipping baseband TSS requests.\n",devVals->deviceModel);
         }
     }else{
-        info("[TSSR] User specified to not request a baseband ticket.\n");
+        info("[TSSR] User specified not to request baseband tickets, skipping baseband TSS requests.\n");
     }
     
     *tssreqret = tssreq;
@@ -1015,7 +1016,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
     plist_t apticket3 = NULL;
     
     if (tssrequest(&tssreq, buildManifestBuffer, devVals, basebandMode))
-        reterror("[TSSR] Failed to build the tss request.\n");
+        reterror("[TSSR] Failed to build the tss request!\n");
 
     isSigned = ((apticket = tss_request_send(tssreq, server_url_string)) > 0);
     
@@ -1026,7 +1027,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
             info("[TSSC] Also requesting an APTicket for installType=Update\n");
             devVals->installType = kInstallTypeUpdate;
             if (tssrequest(&tssreq2, buildManifestBuffer, devVals, basebandMode)){
-                warning("[TSSR] Failed to build the tss request for alternative installType!\n");
+                warning("[TSSR] Failed to build the TSS request for the alternative installType!\n");
             }else{
                 apticket2 = tss_request_send(tssreq2, server_url_string);
                 if (print_tss_response) debug_plist(apticket2);
@@ -1107,7 +1108,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
         strncpy(fname, shshSavePath, prePathLen);
         snprintf(fname+prePathLen, fnamelen, DIRECTORY_DELIMITER_STR"%s_%s_%s-%s_%s.%sshsh%s",cecid,tmpDevicename,cpvers,cbuild, apnonce, save_bplist ? "b" : "", (*devVals->generator || apticket2) ? "2" : "");
         FILE *shshfile = fopen(fname, "wb");
-        if (!shshfile) error("Can't save shsh at %s\n",fname);
+        if (!shshfile) error("Can't save the SHSH blobs to %s, please check the save path and try again.\n",fname);
         else{
             fwrite(data, size, 1, shshfile);
             fclose(shshfile);
@@ -1153,14 +1154,14 @@ int isManifestSignedForDevice(const char *buildManifestPath, t_devicevals *devVa
     
     plist_from_xml(bufManifest, (unsigned)strlen(bufManifest), &manifest);
     if (!manifest)
-        reterror("[TSSC] Failed to load the BuildManifest.\n");
+        reterror("[TSSC] Failed to load the BuildManifest!\n");
     
     if (!versVals->version){
         ProductVersion = plist_dict_get_item(manifest, "ProductVersion");
         plist_get_string_val(ProductVersion, (char**)&versVals->version);
     }
     if (!devVals->deviceModel)
-        reterror("[TSSC] Can't proceed without device info.\n");
+        reterror("[TSSC] Can't proceed without device info!\n");
     
     SupportedProductTypes = plist_dict_get_item(manifest, "SupportedProductTypes");
     if (SupportedProductTypes) {
@@ -1173,7 +1174,7 @@ int isManifestSignedForDevice(const char *buildManifestPath, t_devicevals *devVa
         }
     }
     
-    reterror("[TSSC] The selected device is not compatible with this BuildManifest.\n");
+    reterror("[TSSC] The specified device is not compatible with this BuildManifest!\n");
     
 checkedDeviceModel:
     isSigned = isManifestBufSignedForDevice(bufManifest, devVals, versVals->basebandMode, server_url_string);
@@ -1189,7 +1190,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
 #define reterror(a ... ) {error(a); goto error;}
     int nocacheorig = nocache;
     if (versVals->version && atoi(versVals->version) <= 3) {
-        info("[TSSC] version to check \"%s\" seems to be iOS 3 or lower, which did not require SHSH or APTicket.\n\tSkipping checks and returning true.\n",versVals->version);
+        info("[TSSC] Version to check \"%s\" seems to be iOS 3 or lower, which did not require SHSH blobs.\n\[TSSC] Skipping checks and returning true.\n",versVals->version);
         return 1;
     }
     
@@ -1198,7 +1199,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
     char *buildManifest = NULL;
     
     t_versionURL *urls = getFirmwareUrls(devVals->deviceModel, versVals, firmwareTokens);
-    if (!urls) reterror("[TSSC] Could not get URL for device %s on iOS %s\n",devVals->deviceModel,(!versVals->version ? versVals->buildID : versVals->version));
+    if (!urls) reterror("[TSSC] Could not get the firmware URL to version %s for %s!\n",(!versVals->version ? versVals->buildID : versVals->version),devVals->deviceModel);
 
     int cursigned = 0;
     for (t_versionURL *u = urls; u->url; u++) {
@@ -1213,7 +1214,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
         nocache = 1;
         
         if (cursigned) {
-            info("[TSSC] skipping duplicated build\n");
+            info("[TSSC] Skipping duplicated build.\n");
             
         }else if ((isSignedOne = isManifestBufSignedForDevice(buildManifest, devVals, versVals->basebandMode, server_url_string)) >= 0){
             cursigned |= (isSigned > 0);
@@ -1329,7 +1330,7 @@ char **getListOfiOSForDevice(jssytok_t *tokens, const char *device, int isOTA, i
     jssytok_t *firmwares = getFirmwaresForDevice(device, tokens, isOTA);
     
     if (!firmwares)
-        return error("[TSSC] Device %s could not be found in the device list.\n",device),NULL;
+        return error("[TSSC] The specified device (%s) could not be found in the device list!\n",device),NULL;
     
     int versionsCnt = (int)firmwares->size;
     char **versions = (char**)malloc(versionsCnt * sizeof(char *));
