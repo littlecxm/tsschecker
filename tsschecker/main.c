@@ -95,6 +95,8 @@ void cmd_help(){
     printf("      --print-tss-request\tprint the TSS request that will be sent to Apple\n");
     printf("      --print-tss-response\tprint the TSS response that comes from Apple\n");
     printf("      --raw\t\t\tsend raw file to Apple's TSS server (useful for debugging)\n\n");
+    printf("Homepage: https://github.com/DanTheMann15/tsschecker\n");
+    printf("Original Project: https://github.com/tihmstar/tsschecker\n\n");
 }
 
 int64_t parseECID(const char *ecid){
