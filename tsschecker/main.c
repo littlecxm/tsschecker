@@ -130,7 +130,7 @@ int64_t parseECID(const char *ecid){
             }else if (c >= 'A' && c <= 'F'){
                 ret += 10 + c - 'A';
             }else{
-                return 0; //ERROR parsing failed
+                return 0; //ERROR Parsing failed!
             }
         }
     }
@@ -153,7 +153,7 @@ char *parseNonce(const char *nonce, size_t *parsedLen){
 int main(int argc, const char * argv[]) {
     int err = 0;
     int isSigned = 0;
-    printf("tsschecker version: 0."TSSCHECKER_VERSION_COUNT".0-"TSSCHECKER_VERSION_SHA"-"TSSCHECKER_BUILD_TYPE"\n");
+    printf("tsschecker version: "TSSCHECKER_VERSION_MAJOR"."TSSCHECKER_VERSION_COUNT"."TSSCHECKER_VERSION_PATCH"-"TSSCHECKER_VERSION_SHA"-"TSSCHECKER_BUILD_TYPE"\n");
     printf("%s\n",fragmentzip_version());
     
     dbglog = 1;
@@ -192,7 +192,7 @@ int main(int argc, const char * argv[]) {
                 devVals.deviceModel = strdup(optarg);
                 break;
             case 'i': // long option: "ios"; can be called as short option
-                if (versVals.version) reterror(-9, "[TSSC] parsing parameter failed!\n");
+                if (versVals.version) reterror(-9, "[TSSC] Parsing parameter failed!\n");
                 versVals.version = strdup(optarg);
                 break;
             case 'Z': // long option: "buildid"; can be called as short option
@@ -215,10 +215,10 @@ int main(int argc, const char * argv[]) {
                     devVals.generator[i+2] = tolower(optarg[i+2]);
                     if (!isdigit(optarg[i+2]) && ((int)devVals.generator[i+2] < 'a' || devVals.generator[i+2] > 'f'))
                         failparse:
-                        reterror(-10, "[TSSC] parsing generator \"%s\" failed\n",optarg);
+                        reterror(-10, "[TSSC] Parsing generator \"%s\" failed!\n",optarg);
 
                 }
-                info("[TSSC] manually specified generator \"%s\"\n",devVals.generator);
+                info("[TSSC] User manually specified generator \"%s\"\n",devVals.generator);
                 break;
             case 'b': // long option: "no-baseband"; can be called as short option
                 if (optarg) versVals.basebandMode = atoi(optarg);
@@ -227,12 +227,12 @@ int main(int argc, const char * argv[]) {
             case 'u': // long option: "update"; can be called as short option
                 if (optarg) {
                     if ((devVals.installType = atoi(optarg)) > 2 || devVals.installType < 0){
-                        warning("unknown installType %d. Setting installType to default (%d)\n",devVals.installType,devVals.installType = kInstallTypeDefault);
+                        warning("Unknown installType %d. Setting installType to default (%d)\n",devVals.installType,devVals.installType = kInstallTypeDefault);
                     }
                 }else
                     devVals.installType = kInstallTypeUpdate;
                 if (devVals.installType)
-                    printf("[TSSC] manually setting install type = %s\n",devVals.installType == kInstallTypeUpdate ? "Update" : "Erase");
+                    printf("[TSSC] Manually setting install type = %s\n",devVals.installType == kInstallTypeUpdate ? "Update" : "Erase");
                 break;
             case 'l': // long option: "latest"; can be called as short option
                 flags |= FLAG_LATEST_IOS;
@@ -301,7 +301,7 @@ int main(int argc, const char * argv[]) {
         size_t bufSize = 0;
         FILE *f = fopen(rawFilePath, "rb");
         if (!f)
-            reterror(-100, "[TSSC] failed to read rawfile at \"%s\"\n",rawFilePath);
+            reterror(-100, "[TSSC] Failed to read the raw file in \"%s\"!\n",rawFilePath);
         fseek(f, 0, SEEK_END);
         bufSize = ftell(f);
         fseek(f, 0, SEEK_SET);
@@ -327,7 +327,7 @@ int main(int argc, const char * argv[]) {
             if ((tmp = (char*)getModelFromBoardconfig(devVals.deviceBoard)))
                 devVals.deviceModel = strdup(tmp);
             else
-                reterror(-25, "[TSSC] If you using --boardconfig, please also specify device model with -d\n");
+                reterror(-25, "[TSSC] Unrecognized boardconfig!\n[TSSC] If you are using --boardconfig for an unknown device, try also specifying the device model with -d.\n");
         }
     }
     
@@ -343,42 +343,42 @@ int main(int argc, const char * argv[]) {
     
     if (ecid) {
         if ((devVals.ecid = parseECID(ecid)) == 0){
-            reterror(-7, "[TSSC] manually specified ECID=%s, but parsing failed\n",ecid);
+            reterror(-7, "[TSSC] User manually specified ECID=%s, but parsing failed!\n",ecid);
         }else{
-            info("[TSSC] manually specified ECID to use, parsed \"%s\" to dec:%lld hex:%llx\n",ecid,devVals.ecid,devVals.ecid);
+            info("[TSSC] User manually specified ECID to use, parsed \"%s\" to dec:%lld hex:%llx\n",ecid,devVals.ecid,devVals.ecid);
         }
     }
     
     if (apnonce) {
         if ((devVals.apnonce = parseNonce(apnonce,&devVals.parsedApnonceLen)) ){
-            info("[TSSC] manually specified apnonce to use, parsed \"%s\" to hex:",apnonce);
+            info("[TSSC] User manually specified apnonce to use, parsed \"%s\" to hex:",apnonce);
             unsigned char *tmp = (unsigned char*)devVals.apnonce;
             for (int i=0; i< devVals.parsedApnonceLen; i++) info("%02x",*tmp++);
             info("\n");
         }else{
-            reterror(-7, "[TSSC] manually specified ApNonce=%s, but parsing failed\n",apnonce);
+            reterror(-7, "[TSSC] User manually specified ApNonce=%s, but parsing failed!\n",apnonce);
         }
     }
     
     if (sepnonce) {
         if ((devVals.sepnonce = parseNonce(sepnonce,&devVals.parsedSepnonceLen)) ){
-            info("[TSSC] manually specified sepnonce to use, parsed \"%s\" to hex:",sepnonce);
+            info("[TSSC] User manually specified sepnonce to use, parsed \"%s\" to hex:",sepnonce);
             unsigned char *tmp = (unsigned char*)devVals.sepnonce;
             for (int i=0; i< devVals.parsedSepnonceLen; i++) info("%02x",*tmp++);
             info("\n");
         }else{
-            reterror(-7, "[TSSC] manually specified SepNonce=%s, but parsing failed\n",sepnonce);
+            reterror(-7, "[TSSC] User manually specified SepNonce=%s, but parsing failed!\n",sepnonce);
         }
     }
     
     if (bbsnum) {
         t_bbdevice bbinfo = getBBDeviceInfo(devVals.deviceModel);
         if (bbinfo->bbsnumSize == 0) {
-            reterror(-8, "[TSSC] this device has no baseband, so it does not make sense to provide BbSNUM.\n");
+            reterror(-8, "[TSSC] This device has no baseband, so it does not make sense to provide the BbSNUM.\n");
         }
         
         if ((devVals.bbsnum = (uint8_t *)parseNonce(bbsnum, &devVals.bbsnumSize))) {
-            info("[TSSC] manually specified BbSNUM to use, parsed \"%s\" to hex:", bbsnum);
+            info("[TSSC] User manually specified BbSNUM to use, parsed \"%s\" to hex:", bbsnum);
             unsigned char *tmp = devVals.bbsnum;
             for (int i=0; i< devVals.bbsnumSize; i++) info("%02x", *tmp++);
             info("\n");
@@ -388,7 +388,7 @@ int main(int argc, const char * argv[]) {
                          (int)devVals.bbsnumSize);
             }
         } else {
-            reterror(-7, "[TSSC] manually specified BbSNUM=%s, but parsing failed\n", bbsnum);
+            reterror(-7, "[TSSC] User manually specified BbSNUM=%s, but parsing failed!\n", bbsnum);
         }
     }
     
@@ -397,16 +397,16 @@ int main(int argc, const char * argv[]) {
         firmwareJson = (versVals.isOta) ? getOtaJson() : getFirmwareJson();
         if (!devVals.installType) //only set this if installType wasn't set manually
             devVals.isUpdateInstall = (versVals.isOta); //there are no erase installs over OTA
-        if (!firmwareJson) reterror(-6,"[TSSC] could not get firmwares.json\n");
+        if (!firmwareJson) reterror(-6,"[TSSC] Could not get firmwares.json\n");
         
         long cnt = parseTokens(firmwareJson, &firmwareTokens);
         if (cnt < 1){
             if (!nocache){
-                warning("[TSSC] error parsing cached %s.json. Trying to redownload\n",(versVals.isOta) ? "ota" : "firmware");
+                warning("[TSSC] Error parsing cached %s.json. Trying to redownload\n",(versVals.isOta) ? "ota" : "firmwares");
                 nocache = 1;
                 goto reparse; //in case cached json is corrupt, try to redownload and reparse one more time.
             }
-            reterror(-2,"[TSSC] parsing %s.json failed\n",(versVals.isOta) ? "ota" : "firmware");
+            reterror(-2,"[TSSC] Parsing %s.json failed!\n",(versVals.isOta) ? "ota" : "firmwares");
         }
     }
 
@@ -415,14 +415,14 @@ int main(int argc, const char * argv[]) {
         int i = 0;
             
         char **versions = getListOfiOSForDevice(firmwareTokens, devVals.deviceModel, versVals.isOta, &versionCnt);
-        if (!versionCnt) reterror(-8, "[TSSC] failed finding latest firmware version. If you using --boardconfig, please also specify device model with -d ota=%d\n",versVals.isOta);
+        if (!versionCnt) reterror(-8, "[TSSC] Failed finding the latest firmware version.  ota=%d\n[TSSC] If you are using --boardconfig for an unknown device, try also specifying the device model with -d.\n",versVals.isOta);
         char *bpos = NULL;
         while((bpos = strstr(versVals.version = strdup(versions[i++]),"[B]")) != 0){
             if (versVals.useBeta) break;
             free((char*)versVals.version);
-            if (--versionCnt == 0) reterror(-9, "[TSSC] automatic firmware selection couldn't find non-beta firmware\n");
+            if (--versionCnt == 0) reterror(-9, "[TSSC] Automatic firmware selection couldn't find non-beta firmware.\n");
         }
-        info("[TSSC] selecting latest version: %s\n",versVals.version);
+        info("[TSSC] Selecting the latest version: %s\n",versVals.version);
         if (bpos) *bpos= '\0';
         if (versions) free(versions[versionCnt-1]),free(versions);
     }
@@ -431,7 +431,7 @@ int main(int argc, const char * argv[]) {
         printListOfDevices(firmwareTokens);
     }else if (flags & FLAG_LIST_VERSIONS){
         if (!devVals.deviceModel)
-            reterror(-3,"[TSSC] please specify a device for this option\n\tuse -h for more help\n");
+            reterror(-3,"[TSSC] Please specify a device for this option, use -h for more help.\n");
 
         printListOfiOSForDevice(firmwareTokens, devVals.deviceModel, versVals.isOta);
     }else{
@@ -440,16 +440,16 @@ int main(int argc, const char * argv[]) {
             isSigned = isManifestSignedForDevice(buildmanifest, &devVals, &versVals, serverUrl);
 
         }else{
-            if (!devVals.deviceModel) reterror(-3,"[TSSC] please specify a device for this option\n\tuse -h for more help\n");
-            if (!versVals.version && !versVals.buildID) reterror(-5,"[TSSC] please specify an firmware version or buildID for this option\n\tuse -h for more help\n");
+            if (!devVals.deviceModel) reterror(-3,"[TSSC] Please specify a device for this option\n\tuse -h for more help.\n");
+            if (!versVals.version && !versVals.buildID) reterror(-5,"[TSSC] Please specify a firmware version or build number for this option, use -h for more help.\n");
             
             isSigned = isVersionSignedForDevice(firmwareTokens, &versVals, &devVals, serverUrl);
         }
         
-        if (isSigned >=0) printf("\n%s %s for device %s %s being signed!\n",(versVals.buildID) ? "Build" : "Firmware version" ,(versVals.buildID ? versVals.buildID : versVals.version),devVals.deviceModel, (isSigned) ? "IS" : "is NOT");
+        if (isSigned >=0) printf("\n%s %s for this device (%s) %s being signed!\n",(versVals.buildID) ? "Build" : "Firmware version" ,(versVals.buildID ? versVals.buildID : versVals.version),devVals.deviceModel, (isSigned) ? "IS" : "is NOT");
         else{
             putchar('\n');
-            reterror(-69, "[TSSC] checking tss status failed!\n");
+            reterror(-69, "[TSSC] Checking TSS status failed!\n");
         }
     }
     
