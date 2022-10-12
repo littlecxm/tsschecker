@@ -884,7 +884,7 @@ int tss_populate_random(plist_t tssreq, int is64bit, t_devicevals *devVals){
     
     if (devVals->sepnonce){
         if (devVals->parsedSepnonceLen != NONCELEN_SEP)
-            return error("[TSSR] Parsed SEPNoncelen != requiredSEPNoncelen (%u != %u)",(unsigned int)devVals->parsedSepnonceLen,(unsigned int)NONCELEN_SEP),-1;
+            return error("[TSSR] Parsed SEPNoncelen != requiredSEPNoncelen (%u != %u)\n",(unsigned int)devVals->parsedSepnonceLen,(unsigned int)NONCELEN_SEP),-1;
     }else{
         devVals->sepnonce = (char*)malloc((devVals->parsedSepnonceLen = NONCELEN_SEP) +1);
         getRandNum(devVals->sepnonce, devVals->parsedSepnonceLen, 256);
@@ -935,7 +935,7 @@ getID0:
     int is64Bit = !(!sep || plist_get_node_type(sep) != PLIST_DICT);
     
     if (tss_populate_random(tssparameter,is64Bit,devVals))
-        reterror("[TSSR] Failed to populate the tss request!\n");
+        reterror("[TSSR] Failed to populate the TSS request!\n");
     
     tss_parameters_add_from_manifest(tssparameter, id0, true);
     if (tss_request_add_common_tags(tssreq, tssparameter, NULL) < 0) {
@@ -1016,7 +1016,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
     plist_t apticket3 = NULL;
     
     if (tssrequest(&tssreq, buildManifestBuffer, devVals, basebandMode))
-        reterror("[TSSR] Failed to build the tss request!\n");
+        reterror("[TSSR] Failed to build the TSS request!\n");
 
     isSigned = ((apticket = tss_request_send(tssreq, server_url_string)) > 0);
     
