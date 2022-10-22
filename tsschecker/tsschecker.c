@@ -526,7 +526,7 @@ long parseTokens(const char *json, jssytok_t **tokens){
 
 #pragma mark get functions
 //returns NULL terminated array of t_versionURL objects
-t_versionURL *getFirmwareUrls(const char *deviceModel, t_iosVersion *versVals, jssytok_t *tokens){
+t_versionURL *getFirmwareUrls(const char *deviceModel, t_iosVersion *versVals, jssytok_t *tokens, bool beta){
     t_versionURL *rets = NULL;
     const t_versionURL *rets_base = NULL;
     unsigned retcounter = 0;
@@ -552,7 +552,7 @@ malloc_rets:
                 jssytok_t *releaseType = NULL;
                 if (versVals->useBeta && !(releaseType = jssy_dictGetValueForKey(tmp, "releasetype"))) continue;
                 else if (!versVals->useBeta);
-                else if (strncmp(releaseType->value, "Beta", releaseType->size) != 0) continue;
+                else if (strncmp(releaseType->value, "Beta", releaseType->size) != 0 && !beta) continue;
             }
             
             jssytok_t *url = jssy_dictGetValueForKey(tmp, "url");
@@ -1232,7 +1232,7 @@ int isVersionSignedForDevice(jssytok_t *firmwareTokens, t_iosVersion *versVals, 
     int isSignedOne = 0;
     char *buildManifest = NULL;
     
-    t_versionURL *urls = getFirmwareUrls(devVals->deviceModel, versVals, firmwareTokens);
+    t_versionURL *urls = getFirmwareUrls(devVals->deviceModel, versVals, firmwareTokens, false);
     if (!urls) reterror("[TSSC] Could not get the firmware URL to version %s for %s!\n",(!versVals->version ? versVals->buildID : versVals->version),devVals->deviceModel);
 
     int cursigned = 0;
@@ -1271,10 +1271,10 @@ error:
 }
 
 #pragma mark print functions
-char *getFirmwareUrl(const char *deviceModel, t_iosVersion *versVals, jssytok_t *tokens){
+char *getFirmwareUrl(const char *deviceModel, t_iosVersion *versVals, jssytok_t *tokens, bool beta){
     warning("FUNCTION IS DEPRECATED, USE getFirmwareUrls INSTEAD!\n");
     t_versionURL *versions, *v;
-    versions = v = getFirmwareUrls(deviceModel, versVals, tokens);
+    versions = v = getFirmwareUrls(deviceModel, versVals, tokens, beta);
 
     if (!versions)
         return NULL;
@@ -1359,7 +1359,7 @@ int cmpfunc(const void * a, const void * b){
     }
 }
 
-char **getListOfiOSForDevice(jssytok_t *tokens, const char *device, int isOTA, int *versionCntt){
+char **getListOfiOSForDevice(jssytok_t *tokens, const char *device, int isOTA, int *versionCntt, bool beta){
     //requires free(versions[versionsCnt-1]); and free(versions); after use
     jssytok_t *firmwares = getFirmwaresForDevice(device, tokens, isOTA);
     
@@ -1377,7 +1377,7 @@ char **getListOfiOSForDevice(jssytok_t *tokens, const char *device, int isOTA, i
         int isBeta = 0;
         jssytok_t *releaseType = NULL;
         if ((releaseType = jssy_dictGetValueForKey(tmp, "releasetype"))) {
-            isBeta = (strncmp(releaseType->value, "Beta", releaseType->size) == 0);
+            isBeta = (strncmp(releaseType->value, "Beta", releaseType->size) == 0 && beta);
         }
         
         versions[--versionsCnt] = (char*)malloc((ios->size+1 + isBeta * strlen("[B]")) * sizeof(char));
@@ -1391,7 +1391,7 @@ char **getListOfiOSForDevice(jssytok_t *tokens, const char *device, int isOTA, i
     return versions;
 }
 
-char **getListOfiOSForDevice2(jssytok_t *tokens, const char *device, int isOTA, int *versionCntt, int buildid){
+char **getListOfiOSForDevice2(jssytok_t *tokens, const char *device, int isOTA, int *versionCntt, int buildid, bool beta){
     //requires free(versions[versionsCnt-1]); and free(versions); after use
     jssytok_t *firmwares = getFirmwaresForDevice(device, tokens, isOTA);
 
@@ -1410,7 +1410,7 @@ char **getListOfiOSForDevice2(jssytok_t *tokens, const char *device, int isOTA, 
         int isBeta = 0;
         jssytok_t *releaseType = NULL;
         if ((releaseType = jssy_dictGetValueForKey(tmp, "releasetype"))) {
-            isBeta = (strncmp(releaseType->value, "Beta", releaseType->size) == 0);
+            isBeta = (strncmp(releaseType->value, "Beta", releaseType->size) == 0 && beta);
         }
 
         versions[--versionsCnt] = (char*)malloc((ios->size+1 + isBeta * strlen("[B]")) * sizeof(char));
@@ -1451,7 +1451,7 @@ int printListOfiOSForDevice(jssytok_t *tokens, char *device, int isOTA){
 #define MAX_PER_LINE 10
     
     int versionsCnt;
-    char **versions = getListOfiOSForDevice(tokens, device, isOTA, &versionsCnt);
+    char **versions = getListOfiOSForDevice(tokens, device, isOTA, &versionsCnt, 0);
     
     int rspn = 0,
         currVer = 0,
