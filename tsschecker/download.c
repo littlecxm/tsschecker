@@ -15,7 +15,7 @@ size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 }
 
 int downloadFile(const char *url, const char *dstPath){
-    info("[DOWN] Downloading file: %s\n",url);
+    info("[DOWN] Downloading BuildManifest.plist from: %s\n",url);
     CURL *mcurl = curl_easy_init();
     
     FILE *dfile = fopen(dstPath, "wb");
@@ -30,7 +30,7 @@ int downloadFile(const char *url, const char *dstPath){
     curl_easy_cleanup(mcurl);
     fclose(dfile);
     if (res != CURLE_OK){
-        error("Failed to download file from: %s to=%s CURLcode=%d\n[TSSC] BuildManifest.plist not directly available, using fallback method...\n",url,dstPath,res);
+        error("Failed to download BuildManifest.plist from: %s to=%s CURLcode=%d\n[TSSC] BuildManifest.plist not directly available, using fallback method...\n",url,dstPath,res);
         return res;
     }
     return 0;

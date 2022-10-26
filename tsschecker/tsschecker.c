@@ -17,6 +17,7 @@
 #include "tsschecker.h"
 #include "debug.h"
 #include "download.h"
+#include "common.h"
 #include "tss.h"
 
 #include <libfragmentzip/libfragmentzip.h>
@@ -737,8 +738,6 @@ t_bbdevice getBBDeviceInfo(const char *deviceModel){
     return bbdevs;
 }
 
-void debug_plist(plist_t plist);
-
 void getRandNum(char *dst, size_t size, int base){
     srand((unsigned int)time(NULL));
     for (int i=0; i<size; i++) {
@@ -1065,7 +1064,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
 
     isSigned = ((apticket = tss_request_send(tssreq, server_url_string)) > 0);
     
-    if (print_tss_response) debug_plist(apticket);
+    if (print_tss_response) debug_plist2(apticket);
     if (isSigned && save_shshblobs){
         if (!devVals->installType){
             plist_t tssreq2 = NULL;
@@ -1075,7 +1074,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
                 warning("[TSSR] Failed to build the TSS request for the alternative installType!\n");
             }else{
                 apticket2 = tss_request_send(tssreq2, server_url_string);
-                if (print_tss_response) debug_plist(apticket2);
+                if (print_tss_response) debug_plist2(apticket2);
             }
             if (tssreq2) plist_free(tssreq2);
             devVals->installType = kInstallTypeDefault;
@@ -1090,7 +1089,7 @@ int isManifestBufSignedForDevice(char *buildManifestBuffer, t_devicevals *devVal
             devVals->installType = kInstallTypeErase;
             if (!tssrequest(&tssreq2, buildManifestBuffer, devVals, kBasebandModeWithoutBaseband)){
                 apticket3 = tss_request_send(tssreq2, server_url_string);
-                if (print_tss_response) debug_plist(apticket3);
+                if (print_tss_response) debug_plist2(apticket3);
             }
             devVals->parsedApnonceLen = apnonceLen;
             devVals->apnonce = apnonce;

@@ -264,8 +264,9 @@ int tss_request_add_ap_img4_tags(plist_t request, plist_t parameters)
     }
     _plist_dict_copy_string(request, parameters, "Ap,OSLongVersion", NULL);
 
-    if (_plist_dict_copy_data(request, parameters, "ApNonce", NULL) < 0) {
-        plist_dict_set_item(request, "ApNonce", plist_new_data(NULL, 0));
+    if (plist_dict_get_item(parameters, "ApNonce") && _plist_dict_copy_data(request, parameters, "ApNonce", NULL) < 0) {
+        tsserror("ERROR: Unable to find required ApNonce in parameters\n");
+        return -1;
     }
 
     plist_dict_set_item(request, "@ApImg4Ticket", plist_new_bool(1));
@@ -454,7 +455,7 @@ int tss_request_add_ap_recovery_tags(plist_t request, plist_t parameters, plist_
             return -1;
         }
 
-        /* do not populate BaseBandFirmware, only in basebaseband request */
+        /* do not populate BaseBandFirmware, only in baseband request */
         if ((strcmp(key, "BasebandFirmware") == 0)) {
             continue;
         }
@@ -1454,8 +1455,8 @@ static size_t tss_write_callback(char* data, size_t size, size_t nmemb, tss_resp
 }
 
 plist_t tss_request_send(plist_t tss_request, const char* server_url_string) {
-    if (print_tss_request) {
-        debug_plist(tss_request);
+    if (print_tss_request || idevicerestore_debug) {
+        debug_plist2(tss_request);
     }
 
     char* request = NULL;
