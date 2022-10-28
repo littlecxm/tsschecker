@@ -15,10 +15,10 @@ jobs:
         with:
           fetch-depth: 1
       - name: run build script
-        working-directory: ./script
         run: |
+          cd ./script
           sudo chmod +x ./build-ubuntu.sh
-          ./build-ubuntu.sh
+          sudo ./build-ubuntu.sh
         shell: bash
       - name: prepare artifact
         run: |
@@ -30,34 +30,34 @@ jobs:
         with:
           name: tsschecker-latest_${{ matrix.arch }}-${{ env.dest }}
           path: tsschecker.tar
-  build-darwin:
-    runs-on: macos-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: install dependencies
-        run: |
-          if test -x "`which port`"; then
-            sudo port install libtool autoconf automake pkgconfig libusb readline curl
-          else
-            brew install libtool autoconf automake pkgconfig 
-            brew unlink libusb curl
-            brew install --HEAD libusb curl --force
-          fi
-        shell: bash
-      - name: run build script
-        working-directory: ./script
-        run: |
-          ./build-darwin.sh
-        shell: bash
-      - name: prepare artifact
-        run: |
-          mkdir -p dest
-          DESTDIR=`pwd`/dest make install
-          tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
-      - name: publish artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: tsschecker-latest_${{ matrix.arch }}-${{ env.dest }}
-          path: tsschecker.tar
+  # build-darwin:
+  #   runs-on: macos-latest
+  #   defaults:
+  #     run:
+  #       shell: bash
+  #   steps:
+  #     - name: install dependencies
+  #       run: |
+  #         if test -x "`which port`"; then
+  #           sudo port install libtool autoconf automake pkgconfig libusb readline curl
+  #         else
+  #           brew install libtool autoconf automake pkgconfig
+  #           brew unlink libusb curl
+  #           brew install --HEAD libusb curl --force
+  #         fi
+  #       shell: bash
+  #     - name: run build script
+  #       working-directory: ./script
+  #       run: |
+  #         ./build-darwin.sh
+  #       shell: bash
+  #     - name: prepare artifact
+  #       run: |
+  #         mkdir -p dest
+  #         DESTDIR=`pwd`/dest make install
+  #         tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
+  #     - name: publish artifact
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: tsschecker-latest_${{ matrix.arch }}-${{ env.dest }}
+  #         path: tsschecker.tar

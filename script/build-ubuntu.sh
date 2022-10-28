@@ -11,7 +11,7 @@ cd $WORKDIR/depcomp/libplist
 make install
 
 git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/libimobiledevice/libimobiledevice-glue
-cd $WORKDIR/depcomp/libplist
+cd $WORKDIR/depcomp/libimobiledevice-glue
 ./autogen.sh
 make install
 
