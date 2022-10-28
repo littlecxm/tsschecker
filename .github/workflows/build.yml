@@ -17,7 +17,7 @@ jobs:
         shell: bash
       - name: run build script
         run: |
-          cd script
+          cd ./script
           chmod +x build-ubuntu.sh
           ./build-ubuntu.sh
         shell: bash
@@ -49,7 +49,7 @@ jobs:
         shell: bash
       - name: run build script
         run: |
-          cd script
+          cd ./script
           chmod +x build-darwin.sh
           ./build-darwin.sh
         shell: bash
