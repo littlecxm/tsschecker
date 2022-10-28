@@ -11,6 +11,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install libcurl4-openssl-dev libreadline-dev libusb-1.0-0-dev libtool automake autoconf gcc make g++ libzip-dev patch file bash
         shell: bash
+      - name: prepare environment
+        run: |
+          echo "target_triplet=`gcc -dumpmachine`" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           submodules: true
@@ -25,12 +28,16 @@ jobs:
         working-directory: .
         run: |
           mkdir -p dest
-          tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
-      - name: publish artifact
-        uses: actions/upload-artifact@v2
+          tar -C dest -cf tsschecker-latest_${{env.target_triplet}}.tar /usr/local/bin/tsschecker
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        # if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: tsschecker-latest_${{ matrix.arch }}-${{ env.dest }}
-          path: tsschecker.tar
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          prerelease: true
+          files: |
+            dest/tsschecker-latest_${{env.target_triplet}}.tar
+
   # build-darwin:
   #   runs-on: macos-latest
   #   defaults:
