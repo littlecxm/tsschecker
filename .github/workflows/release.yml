@@ -30,12 +30,12 @@ jobs:
       - name: prepare artifact
         working-directory: .
         run: |
-          mkdir -p dest
-          tar -C dest -cf tsschecker-latest_${{env.target_triplet}}.tar /usr/local/bin/tsschecker
+          mkdir -p ${{ github.workspace }}/dest
+          tar -C ${{ github.workspace }}/dest -cf tsschecker-latest_${{env.target_triplet}}.tar /usr/local/bin/tsschecker
       - name: create release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           files: |
-            dest/tsschecker-latest_${{env.target_triplet}}.tar
+            ${{ github.workspace }}/dest/tsschecker-latest_${{env.target_triplet}}.tar
