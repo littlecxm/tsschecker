@@ -17,7 +17,7 @@ jobs:
       - name: run build script
         working-directory: ./script
         run: |
-          ./build-ubuntu.sh
+          sudo ./build-ubuntu.sh
         shell: bash
       - name: prepare artifact
         run: |
