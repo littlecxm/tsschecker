@@ -60,7 +60,7 @@ jobs:
       - name: build libfragmentzip
         working-directory: ./depcomp/libfragmentzip
         run: |
-          cat <<EOF | patch
+          cat <<EOF | patch --ignore-whitespace
           --- configure.ac
           +++ configure.ac
           @@ -37,7 +37,7 @@
@@ -69,7 +69,6 @@ jobs:
           LIBZ_REQUIRES_STR="zlib >= 1.0"
           -LIBGENERAL_REQUIRES_STR="libgeneral >= 48"
           +LIBGENERAL_REQUIRES_STR="libgeneral >= 1"
-
           EOF
           ./autogen.sh
           sudo make install
