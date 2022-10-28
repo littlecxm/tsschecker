@@ -9,7 +9,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libcurl-dev libreadline-dev libusb-dev
+          sudo apt-get install libcurl4-openssl-dev libreadline-dev libusb-dev
         shell: bash
       - name: fetch libplist
         uses: actions/checkout@v3
@@ -128,7 +128,8 @@ jobs:
           if test -x "`which port`"; then
             sudo port install libtool autoconf automake pkgconfig libusb readline curl
           else
-            brew install libtool autoconf automake pkgconfig libusb readline curl
+            brew install libtool autoconf automake pkgconfig 
+            brew install --HEAD libusb readline curl --force
           fi
         shell: bash
       - name: fetch libplist
