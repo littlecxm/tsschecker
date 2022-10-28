@@ -22,7 +22,9 @@ jobs:
           sudo ./build-ubuntu.sh
         shell: bash
       - name: prepare artifact
+        working-directory: .
         run: |
+          mkdir -p dest
           tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
       - name: publish artifact
         uses: actions/upload-artifact@v2
