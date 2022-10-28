@@ -11,101 +11,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install libcurl4-openssl-dev libreadline-dev libusb-1.0-0-dev libtool automake autoconf gcc make g++ libzip-dev patch file bash
         shell: bash
-      - name: fetch libplist
-        uses: actions/checkout@v3
-        with:
-          repository: libimobiledevice/libplist
-          path: ./depcomp/libplist
-      - name: build libplist
-        working-directory: ./depcomp/libplist
+      - name: run build script
+        working-directory: ./script
         run: |
-          export LDFLAGS="-Wl,-rpath=/usr/local/lib"
-          ./autogen.sh --enable-debug --without-cython
-          sudo make install
-      - name: fetch libimobiledevice-glue
-        uses: actions/checkout@v3
-        with:
-          repository: libimobiledevice/libimobiledevice-glue
-          path: ./depcomp/libimobiledevice-glue
-      - name: build libimobiledevice-glue
-        working-directory: ./depcomp/libimobiledevice-glue
-        run: |
-          ./autogen.sh
-          sudo make install
-      - name: fetch libirecovery
-        uses: actions/checkout@v3
-        with:
-          repository: libimobiledevice/libirecovery
-          path: ./depcomp/libirecovery
-      - name: build libirecovery
-        working-directory: ./depcomp/libirecovery
-        run: |
-          ./autogen.sh
-          sudo make install
-      - name: fetch libgeneral
-        uses: actions/checkout@v3
-        with:
-          repository: tihmstar/libgeneral
-          path: ./depcomp/libgeneral
-      - name: build libgeneral
-        working-directory: ./depcomp/libgeneral
-        run: |
-          ./autogen.sh
-          sudo make install
-      - name: fetch libfragmentzip
-        uses: actions/checkout@v3
-        with:
-          repository: tihmstar/libfragmentzip
-          path: ./depcomp/libfragmentzip
-      - name: build libfragmentzip
-        working-directory: ./depcomp/libfragmentzip
-        run: |
-          cat <<EOF | patch --ignore-whitespace
-          --- configure.ac
-          +++ configure.ac
-          @@ -37,7 +37,7 @@
-          LIBCURL_REQUIRES_STR="libcurl >= 1.0"
-          LIBZIP_REQUIRES_STR="libzip >= 1.0"
-          LIBZ_REQUIRES_STR="zlib >= 1.0"
-          -LIBGENERAL_REQUIRES_STR="libgeneral >= 48"
-          +LIBGENERAL_REQUIRES_STR="libgeneral >= 1"
-          EOF
-          ./autogen.sh
-          sudo make install
-      - name: build tsschecker
-        working-directory: .
-        run: |
-          cd tsschecker
-          cat <<EOF | patch --ignore-whitespace
-          --- tss.c
-          +++ tss.c
-          @@ -51,7 +51,7 @@
-                  tsserror("ERROR: Invalid ECID passed.\n");
-                  return NULL;
-              }
-          -    snprintf(ecid_string, ECID_STRSIZE, FMT_qu, ecid);
-          +    snprintf(ecid_string, ECID_STRSIZE, "%llu", (long long unsigned int)ecid);
-              return ecid_string;
-          }
-          EOF
-
-          cd ..
-          cat <<EOF | patch
-          --- configure.ac
-          +++ configure.ac
-          @@ -44,7 +44,7 @@
-
-          PKG_CHECK_MODULES(libplist, libplist >= 2.2.0)
-          PKG_CHECK_MODULES(libcurl, libcurl >= 1.0)
-          -PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 48)
-          +PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 1)
-          AS_IF([test "x\$with_libcrypto" != xno],
-              [PKG_CHECK_MODULES(libcrypto, libcrypto >= 1.0)]
-          )
-          EOF
-          ./autogen.sh
-          bash ./configure
-          sudo make install
+          chmod +x build-ubuntu.sh
+          ./build-ubuntu.sh
+        shell: bash
       - name: prepare artifact
         run: |
           mkdir -p dest
@@ -132,100 +43,12 @@ jobs:
             brew install --HEAD libusb curl --force
           fi
         shell: bash
-      - name: fetch libplist
-        uses: actions/checkout@v3
-        with:
-          repository: libimobiledevice/libplist
-          path: ./depcomp/libplist
-      - name: build libplist
-        working-directory: ./depcomp/libplist
+      - name: run build script
+        working-directory: ./script
         run: |
-          ./autogen.sh --enable-debug --without-cython
-          make install
-      - name: fetch libimobiledevice-glue
-        uses: actions/checkout@v3
-        with:
-          repository: libimobiledevice/libimobiledevice-glue
-          path: ./depcomp/libimobiledevice-glue
-      - name: build libimobiledevice-glue
-        working-directory: ./depcomp/libimobiledevice-glue
-        run: |
-          ./autogen.sh
-          make install
-      - name: fetch libirecovery
-        uses: actions/checkout@v3
-        with:
-          repository: libimobiledevice/libirecovery
-          path: ./depcomp/libirecovery
-      - name: build libirecovery
-        working-directory: ./depcomp/libirecovery
-        run: |
-          ./autogen.sh
-          make install
-      - name: fetch libgeneral
-        uses: actions/checkout@v3
-        with:
-          repository: tihmstar/libgeneral
-          path: ./depcomp/libgeneral
-      - name: build libgeneral
-        working-directory: ./depcomp/libgeneral
-        run: |
-          ./autogen.sh
-          make install
-      - name: fetch libfragmentzip
-        uses: actions/checkout@v3
-        with:
-          repository: tihmstar/libfragmentzip
-          path: ./depcomp/libfragmentzip
-      - name: build libfragmentzip
-        working-directory: ./depcomp/libfragmentzip
-        run: |
-          cat <<EOF | patch --ignore-whitespace
-          --- configure.ac
-          +++ configure.ac
-          @@ -37,7 +37,7 @@
-          LIBCURL_REQUIRES_STR="libcurl >= 1.0"
-          LIBZIP_REQUIRES_STR="libzip >= 1.0"
-          LIBZ_REQUIRES_STR="zlib >= 1.0"
-          -LIBGENERAL_REQUIRES_STR="libgeneral >= 48"
-          +LIBGENERAL_REQUIRES_STR="libgeneral >= 1"
-          EOF
-          ./autogen.sh
-          make install
-      - name: build tsschecker
-        working-directory: .
-        run: |
-          cd tsschecker
-          cat <<EOF | patch --ignore-whitespace
-          --- tss.c
-          +++ tss.c
-          @@ -51,7 +51,7 @@
-                  tsserror("ERROR: Invalid ECID passed.\n");
-                  return NULL;
-              }
-          -    snprintf(ecid_string, ECID_STRSIZE, FMT_qu, ecid);
-          +    snprintf(ecid_string, ECID_STRSIZE, "%llu", (long long unsigned int)ecid);
-              return ecid_string;
-          }
-          EOF
-
-          cd ..
-          cat <<EOF | patch
-          --- configure.ac
-          +++ configure.ac
-          @@ -44,7 +44,7 @@
-
-          PKG_CHECK_MODULES(libplist, libplist >= 2.2.0)
-          PKG_CHECK_MODULES(libcurl, libcurl >= 1.0)
-          -PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 48)
-          +PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 1)
-          AS_IF([test "x\$with_libcrypto" != xno],
-              [PKG_CHECK_MODULES(libcrypto, libcrypto >= 1.0)]
-          )
-          EOF
-          ./autogen.sh
-          bash ./configure
-          make install
+          chmod +x build-darwin.sh
+          ./build-darwin.sh
+        shell: bash
       - name: prepare artifact
         run: |
           mkdir -p dest
