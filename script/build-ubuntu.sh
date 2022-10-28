@@ -2,30 +2,30 @@
 cd ..
 WORKDIR=$(pwd)
 echo "WORKDIR: $WORKDIR"
-mkdir -p ./depcomp
+mkdir -p ./deploy
 
-git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/libimobiledevice/libplist
-cd $WORKDIR/depcomp/libplist
+git -C $WORKDIR/deploy clone --depth=1 --recursive https://github.com/libimobiledevice/libplist
+cd $WORKDIR/deploy/libplist
 ./autogen.sh --enable-debug --without-cython
 make install
 
-git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/libimobiledevice/libimobiledevice-glue
-cd $WORKDIR/depcomp/libimobiledevice-glue
+git -C $WORKDIR/deploy clone --depth=1 --recursive https://github.com/libimobiledevice/libimobiledevice-glue
+cd $WORKDIR/deploy/libimobiledevice-glue
 ./autogen.sh
 make install
 
-git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/libimobiledevice/libirecovery
-cd $WORKDIR/depcomp/libirecovery
+git -C $WORKDIR/deploy clone --depth=1 --recursive https://github.com/libimobiledevice/libirecovery
+cd $WORKDIR/deploy/libirecovery
 ./autogen.sh
 make install
 
-git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/tihmstar/libgeneral
-cd $WORKDIR/depcomp/libgeneral
+git -C $WORKDIR/deploy clone --depth=1 --recursive https://github.com/tihmstar/libgeneral
+cd $WORKDIR/deploy/libgeneral
 ./autogen.sh
 make install
 
-git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/tihmstar/libfragmentzip
-cd $WORKDIR/depcomp/libfragmentzip
+git -C $WORKDIR/deploy clone --depth=1 --recursive https://github.com/tihmstar/libfragmentzip
+cd $WORKDIR/deploy/libfragmentzip
 cat <<EOF | patch
 --- configure.ac
 +++ configure.ac
@@ -41,7 +41,6 @@ EOF
 make install
 
 cd $WORKDIR
-echo "patch tss.c"
 cd tsschecker
 cat <<EOF | patch --ignore-whitespace
 --- tss.c
@@ -57,7 +56,6 @@ cat <<EOF | patch --ignore-whitespace
 EOF
 
 cd ..
-echo "patch configure.ac"
 cat <<EOF | patch
 --- configure.ac
 +++ configure.ac
