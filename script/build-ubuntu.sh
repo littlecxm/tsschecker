@@ -1,5 +1,4 @@
 #!/bin/bash
-export LDFLAGS="-Wl,-rpath=/usr/local/lib"
 cd ..
 WORKDIR=$(pwd)
 echo "WORKDIR: $WORKDIR"
@@ -42,6 +41,7 @@ EOF
 make install
 
 cd $WORKDIR
+echo "patch tss.c"
 cd tsschecker
 cat <<EOF | patch --ignore-whitespace
 --- tss.c
@@ -57,6 +57,7 @@ cat <<EOF | patch --ignore-whitespace
 EOF
 
 cd ..
+echo "patch configure.ac"
 cat <<EOF | patch
 --- configure.ac
 +++ configure.ac
