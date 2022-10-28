@@ -42,7 +42,6 @@ EOF
 make install
 
 cd $WORKDIR
-
 cd tsschecker
 cat <<EOF | patch --ignore-whitespace
 --- tss.c
