@@ -11,6 +11,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install libcurl4-openssl-dev libreadline-dev libusb-1.0-0-dev libtool automake autoconf gcc make g++ libzip-dev patch file bash
         shell: bash
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
       - name: run build script
         run: |
           cd ./script
