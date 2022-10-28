@@ -12,8 +12,8 @@ jobs:
           sudo apt-get install libcurl4-openssl-dev libreadline-dev libusb-1.0-0-dev libtool automake autoconf gcc make g++ libzip-dev patch file bash
         shell: bash
       - name: run build script
-        working-directory: ./script
         run: |
+          cd script
           chmod +x build-ubuntu.sh
           ./build-ubuntu.sh
         shell: bash
@@ -44,8 +44,8 @@ jobs:
           fi
         shell: bash
       - name: run build script
-        working-directory: ./script
         run: |
+          cd script
           chmod +x build-darwin.sh
           ./build-darwin.sh
         shell: bash
