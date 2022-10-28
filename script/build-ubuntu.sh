@@ -2,6 +2,7 @@
 export LDFLAGS="-Wl,-rpath=/usr/local/lib"
 cd ..
 WORKDIR=$(pwd)
+echo "WORKDIR: $WORKDIR"
 mkdir -p ./depcomp
 
 git -C $WORKDIR/depcomp clone --depth=1 --recursive https://github.com/libimobiledevice/libplist

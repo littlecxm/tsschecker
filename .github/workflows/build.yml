@@ -5,6 +5,10 @@ on:
 jobs:
   build-linux-ubuntu:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
     steps:
       - name: install dependencies
         run: |
