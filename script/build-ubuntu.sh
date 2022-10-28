@@ -72,3 +72,4 @@ EOF
 
 ./autogen.sh
 bash ./configure
+make install

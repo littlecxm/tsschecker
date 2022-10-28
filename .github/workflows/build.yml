@@ -23,8 +23,6 @@ jobs:
         shell: bash
       - name: prepare artifact
         run: |
-          mkdir -p dest
-          DESTDIR=`pwd`/dest make install
           tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
       - name: publish artifact
         uses: actions/upload-artifact@v2
