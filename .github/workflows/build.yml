@@ -9,6 +9,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
+          sudo apt-get install curl-dev readline-dev libusb-dev
         shell: bash
       - name: fetch libplist
         uses: actions/checkout@v3
@@ -125,9 +126,9 @@ jobs:
       - name: install dependencies
         run: |
           if test -x "`which port`"; then
-            sudo port install libtool autoconf automake pkgconfig
+            sudo port install libtool autoconf automake pkgconfig libusb readline curl
           else
-            brew install libtool autoconf automake pkgconfig
+            brew install libtool autoconf automake pkgconfig libusb readline curl
           fi
         shell: bash
       - name: fetch libplist
