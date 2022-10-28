@@ -27,6 +27,17 @@ make install
 
 git -C /app clone --depth=1 --recursive https://github.com/tihmstar/libfragmentzip
 cd /app/libfragmentzip
+cat <<EOF | patch
+--- configure.ac
++++ configure.ac
+@@ -37,7 +37,7 @@
+ LIBCURL_REQUIRES_STR="libcurl >= 1.0"
+ LIBZIP_REQUIRES_STR="libzip >= 1.0"
+ LIBZ_REQUIRES_STR="zlib >= 1.0"
+-LIBGENERAL_REQUIRES_STR="libgeneral >= 48"
++LIBGENERAL_REQUIRES_STR="libgeneral >= 1"
+ 
+EOF
 ./autogen.sh
 make install
 
