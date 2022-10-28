@@ -1,0 +1,238 @@
+name: build
+
+on:
+  push:
+jobs:
+  build-linux-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+        shell: bash
+      - name: fetch libplist
+        uses: actions/checkout@v3
+        with:
+          repository: libimobiledevice/libplist
+          path: ./depcomp/libplist
+      - name: build libplist
+        working-directory: ./depcomp/libplist
+        run: |
+          export LDFLAGS="-Wl,-rpath=/usr/local/lib"
+          ./autogen.sh --enable-debug --without-cython
+          make install
+      - name: fetch libimobiledevice-glue
+        uses: actions/checkout@v3
+        with:
+          repository: libimobiledevice/libimobiledevice-glue
+          path: ./depcomp/libimobiledevice-glue
+      - name: build libimobiledevice-glue
+        working-directory: ./depcomp/libimobiledevice-glue
+        run: |
+          ./autogen.sh
+          make install
+      - name: fetch libirecovery
+        uses: actions/checkout@v3
+        with:
+          repository: libimobiledevice/libirecovery
+          path: ./depcomp/libirecovery
+      - name: build libirecovery
+        working-directory: ./depcomp/libirecovery
+        run: |
+          ./autogen.sh
+          make install
+      - name: fetch libgeneral
+        uses: actions/checkout@v3
+        with:
+          repository: tihmstar/libgeneral
+          path: ./depcomp/libgeneral
+      - name: build libgeneral
+        working-directory: ./depcomp/libgeneral
+        run: |
+          ./autogen.sh
+          make install
+      - name: fetch libfragmentzip
+        uses: actions/checkout@v3
+        with:
+          repository: tihmstar/libfragmentzip
+          path: ./depcomp/libfragmentzip
+      - name: build libfragmentzip
+        working-directory: ./depcomp/libfragmentzip
+        run: |
+          cat <<EOF | patch
+            --- configure.ac
+            +++ configure.ac
+            @@ -37,7 +37,7 @@
+            LIBCURL_REQUIRES_STR="libcurl >= 1.0"
+            LIBZIP_REQUIRES_STR="libzip >= 1.0"
+            LIBZ_REQUIRES_STR="zlib >= 1.0"
+            -LIBGENERAL_REQUIRES_STR="libgeneral >= 48"
+            +LIBGENERAL_REQUIRES_STR="libgeneral >= 1"
+            
+          EOF
+          ./autogen.sh
+          make install
+      - name: build tsschecker
+        working-directory: .
+        run: |
+          cd tsschecker
+          cat <<EOF | patch --ignore-whitespace
+          --- tss.c
+          +++ tss.c
+          @@ -51,7 +51,7 @@
+                  tsserror("ERROR: Invalid ECID passed.\n");
+                  return NULL;
+              }
+          -    snprintf(ecid_string, ECID_STRSIZE, FMT_qu, ecid);
+          +    snprintf(ecid_string, ECID_STRSIZE, "%llu", (long long unsigned int)ecid);
+              return ecid_string;
+          }
+          EOF
+
+          cd ..
+          cat <<EOF | patch
+          --- configure.ac
+          +++ configure.ac
+          @@ -44,7 +44,7 @@
+
+          PKG_CHECK_MODULES(libplist, libplist >= 2.2.0)
+          PKG_CHECK_MODULES(libcurl, libcurl >= 1.0)
+          -PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 48)
+          +PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 1)
+          AS_IF([test "x\$with_libcrypto" != xno],
+              [PKG_CHECK_MODULES(libcrypto, libcrypto >= 1.0)]
+          )
+          EOF
+          ./autogen.sh
+          bash ./configure
+          make install
+      - name: prepare artifact
+        run: |
+          mkdir -p dest
+          DESTDIR=`pwd`/dest make install
+          tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
+      - name: publish artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tsschecker-latest_${{ matrix.arch }}-${{ env.dest }}
+          path: tsschecker.tar
+  build-darwin:
+    runs-on: macos-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: install dependencies
+        run: |
+          if test -x "`which port`"; then
+            sudo port install libtool autoconf automake pkgconfig
+          else
+            brew install libtool autoconf automake pkgconfig
+          fi
+        shell: bash
+      - name: fetch libplist
+        uses: actions/checkout@v3
+        with:
+          repository: libimobiledevice/libplist
+          path: ./depcomp/libplist
+      - name: build libplist
+        working-directory: ./depcomp/libplist
+        run: |
+          export LDFLAGS="-Wl,-rpath=/usr/local/lib"
+          ./autogen.sh --enable-debug --without-cython
+          make install
+      - name: fetch libimobiledevice-glue
+        uses: actions/checkout@v3
+        with:
+          repository: libimobiledevice/libimobiledevice-glue
+          path: ./depcomp/libimobiledevice-glue
+      - name: build libimobiledevice-glue
+        working-directory: ./depcomp/libimobiledevice-glue
+        run: |
+          ./autogen.sh
+          make install
+      - name: fetch libirecovery
+        uses: actions/checkout@v3
+        with:
+          repository: libimobiledevice/libirecovery
+          path: ./depcomp/libirecovery
+      - name: build libirecovery
+        working-directory: ./depcomp/libirecovery
+        run: |
+          ./autogen.sh
+          make install
+      - name: fetch libgeneral
+        uses: actions/checkout@v3
+        with:
+          repository: tihmstar/libgeneral
+          path: ./depcomp/libgeneral
+      - name: build libgeneral
+        working-directory: ./depcomp/libgeneral
+        run: |
+          ./autogen.sh
+          make install
+      - name: fetch libfragmentzip
+        uses: actions/checkout@v3
+        with:
+          repository: tihmstar/libfragmentzip
+          path: ./depcomp/libfragmentzip
+      - name: build libfragmentzip
+        working-directory: ./depcomp/libfragmentzip
+        run: |
+          cat <<EOF | patch
+            --- configure.ac
+            +++ configure.ac
+            @@ -37,7 +37,7 @@
+            LIBCURL_REQUIRES_STR="libcurl >= 1.0"
+            LIBZIP_REQUIRES_STR="libzip >= 1.0"
+            LIBZ_REQUIRES_STR="zlib >= 1.0"
+            -LIBGENERAL_REQUIRES_STR="libgeneral >= 48"
+            +LIBGENERAL_REQUIRES_STR="libgeneral >= 1"
+            
+          EOF
+          ./autogen.sh
+          make install
+      - name: build tsschecker
+        working-directory: .
+        run: |
+          cd tsschecker
+          cat <<EOF | patch --ignore-whitespace
+          --- tss.c
+          +++ tss.c
+          @@ -51,7 +51,7 @@
+                  tsserror("ERROR: Invalid ECID passed.\n");
+                  return NULL;
+              }
+          -    snprintf(ecid_string, ECID_STRSIZE, FMT_qu, ecid);
+          +    snprintf(ecid_string, ECID_STRSIZE, "%llu", (long long unsigned int)ecid);
+              return ecid_string;
+          }
+          EOF
+
+          cd ..
+          cat <<EOF | patch
+          --- configure.ac
+          +++ configure.ac
+          @@ -44,7 +44,7 @@
+
+          PKG_CHECK_MODULES(libplist, libplist >= 2.2.0)
+          PKG_CHECK_MODULES(libcurl, libcurl >= 1.0)
+          -PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 48)
+          +PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 1)
+          AS_IF([test "x\$with_libcrypto" != xno],
+              [PKG_CHECK_MODULES(libcrypto, libcrypto >= 1.0)]
+          )
+          EOF
+          ./autogen.sh
+          bash ./configure
+          make install
+      - name: prepare artifact
+        run: |
+          mkdir -p dest
+          DESTDIR=`pwd`/dest make install
+          tar -C dest -cf tsschecker.tar /usr/local/bin/tsschecker
+      - name: publish artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tsschecker-latest_${{ matrix.arch }}-${{ env.dest }}
+          path: tsschecker.tar
