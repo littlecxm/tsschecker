@@ -20,7 +20,7 @@ jobs:
         run: |
           export LDFLAGS="-Wl,-rpath=/usr/local/lib"
           ./autogen.sh --enable-debug --without-cython
-          make install
+          sudo make install
       - name: fetch libimobiledevice-glue
         uses: actions/checkout@v3
         with:
@@ -30,7 +30,7 @@ jobs:
         working-directory: ./depcomp/libimobiledevice-glue
         run: |
           ./autogen.sh
-          make install
+          sudo make install
       - name: fetch libirecovery
         uses: actions/checkout@v3
         with:
@@ -40,7 +40,7 @@ jobs:
         working-directory: ./depcomp/libirecovery
         run: |
           ./autogen.sh
-          make install
+          sudo make install
       - name: fetch libgeneral
         uses: actions/checkout@v3
         with:
@@ -71,7 +71,7 @@ jobs:
             
           EOF
           ./autogen.sh
-          make install
+          sudo make install
       - name: build tsschecker
         working-directory: .
         run: |
@@ -105,7 +105,7 @@ jobs:
           EOF
           ./autogen.sh
           bash ./configure
-          make install
+          sudo make install
       - name: prepare artifact
         run: |
           mkdir -p dest
@@ -138,7 +138,6 @@ jobs:
       - name: build libplist
         working-directory: ./depcomp/libplist
         run: |
-          export LDFLAGS="-Wl,-rpath=/usr/local/lib"
           ./autogen.sh --enable-debug --without-cython
           make install
       - name: fetch libimobiledevice-glue
