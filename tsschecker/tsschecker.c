@@ -614,7 +614,7 @@ int downloadPartialzip(const char *url, const char *file, const char *dst){
 char *getBuildManifest(char *url, const char *device, const char *version, const char *buildID, int isOta){
     struct stat st = {0};
     
-    size_t len = strlen(MANIFEST_SAVE_PATH) + strlen("/__") + strlen(device) + strlen(version) +1;
+    size_t len = strlen(MANIFEST_SAVE_PATH) + strlen("/__") + strlen(device) + strlen(version) +1 + strlen(".plist");
     if (buildID) len += strlen(buildID);
     if (isOta) len += strlen("ota");
     char *fileDir = malloc(len);
@@ -630,7 +630,8 @@ char *getBuildManifest(char *url, const char *device, const char *version, const
         strcat(fileDir, buildID);
     }
     
-    if (isOta) strcat(fileDir, "ota");
+    if (isOta) strcat(fileDir, "_OTA");
+    strcat(fileDir, ".plist");
     
     memset(&st, 0, sizeof(st));
     if (stat(MANIFEST_SAVE_PATH, &st) == -1) __mkdir(MANIFEST_SAVE_PATH, 0700);
@@ -644,8 +645,8 @@ char *getBuildManifest(char *url, const char *device, const char *version, const
     FILE *f = fopen(fileDir, "rb");
     if (!url) {
         if (!f || nocache) return NULL;
-        info("[TSSC] Using cached BuildManifest for %s.\n",name);
-    }else info("[TSSC] Opening the BuildManifest for %s.\n",name);
+        info("[TSSC] Using cached BuildManifest: %s\n",name);
+    }else info("[TSSC] Opening BuildManifest: %s\n",name);
     
     if (!f || nocache){
         //download if it isn't there
