@@ -44,6 +44,7 @@ static struct option longopts[] = {
     { "save",               no_argument,       NULL, 's' },
     { "latest",             no_argument,       NULL, 'l' },
     { "update-install",     optional_argument, NULL, 'u' },
+    { "erase-install",      optional_argument, NULL, 'E' },
     { "boardconfig",        required_argument, NULL, 'B' },
     { "buildid",            required_argument, NULL, 'Z' },
     { "debug",              no_argument,       NULL,  0  },
@@ -76,19 +77,20 @@ void cmd_help(){
     printf("  -b, --no-baseband\t\tdon't check baseband signing status. Request tickets without baseband\n");
     printf("  -m, --build-manifest\t\tmanually specify a BuildManifest (can be used with -d)\n");
     printf("  -s, --save\t\t\tsave fetched shsh blobs (mostly makes sense with -e)\n");
-    printf("  -u, --update-install\t\trequest update tickets instead of erase\n");
+    printf("  -u, --update-install\t\trequest only update tickets\n");
+    printf("  -E, --erase-install\t\trequest only erase tickets\n");
     printf("  -l, --latest\t\t\tuse the latest public firmware version instead of manually specifying one\n");
     printf("                 \t\tespecially useful with -s and -e for saving shsh blobs\n");
     printf("  -e, --ecid ECID\t\tmanually specify ECID to be used for fetching blobs, instead of using random ones\n");
     printf("                 \t\tECID must be either DEC or HEX eg. 5482657301265 or 0xab46efcbf71\n");
     printf("  -g, --generator GEN\t\tmanually specify generator in HEX format 16 in length (eg. 0x1111111111111111)\n\n");
-    printf("      --apnonce NONCE\t\tmanually specify ApNonce instead of using random ones\n\t\t\t\t(required when saving blobs for arm64e devices with matching generator)\n\n");
+    printf("      --apnonce NONCE\t\tmanually specify ApNonce instead of using random ones\n\t\t\t\t(required when saving blobs for arm64e devices with a matching generator)\n\n");
     printf("      --sepnonce NONCE\t\tmanually specify SEP Nonce instead of using random ones (not required for saving blobs)\n");
     printf("      --bbsnum SNUM\t\tmanually specify BbSNUM in HEX to save valid BBTickets (not required for saving blobs)\n\n");
-    printf("      --save-path PATH\t\tspecify output path for saving shsh blobs\n");
+    printf("      --save-path PATH\t\tmanually specify the output path for saving shsh blobs\n");
     printf("      --server-url URL\t\tmanually specify TSS server URL\n");
-    printf("      --bplist\t\t\tsave fetched blobs in a binary plist (.bshsh2 format)\n");
-    printf("      --beta\t\t\trequest tickets for a beta instead of normal release (use with -o)\n");
+    printf("      --bplist\t\t\tsave fetched blobs as a binary plist in the .bshsh2 format (used with -s)\n");
+    printf("      --beta\t\t\trequest tickets for a beta instead of normal release (used with -o)\n");
     printf("      --list-devices\t\tlist known devices from firmwares.json\n");
     printf("      --list-versions\t\tlist all known firmware versions for the specified device\n");
     printf("      --nocache \t\tignore caches and re-download required files\n");
@@ -185,7 +187,7 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
 
-    while ((opt = getopt_long(argc, (char* const *)argv, "d:i:e:m:B:hg:slbuo", longopts, &optindex)) > 0) {
+    while ((opt = getopt_long(argc, (char* const *)argv, "d:i:Z:e:m:B:hg:slbuEo", longopts, &optindex)) > 0) {
         switch (opt) {
             case 'h': // long option: "help"; can be called as short option
                 cmd_help();
@@ -226,15 +228,27 @@ int main(int argc, const char * argv[]) {
                 if (optarg) versVals.basebandMode = atoi(optarg);
                 else versVals.basebandMode = kBasebandModeWithoutBaseband;
                 break;
-            case 'u': // long option: "update"; can be called as short option
+            case 'u': // long option: "update-install"; can be called as short option
                 if (optarg) {
                     if ((devVals.installType = atoi(optarg)) > 2 || devVals.installType < 0){
                         warning("Unknown installType %d. Setting installType to default (%d)\n",devVals.installType,devVals.installType = kInstallTypeDefault);
                     }
                 }else
                     devVals.installType = kInstallTypeUpdate;
+                    update_install = 1;
                 if (devVals.installType)
                     printf("[TSSC] Manually setting install type = %s\n",devVals.installType == kInstallTypeUpdate ? "Update" : "Erase");
+                break;
+            case 'E': // long option: "erase-install"; can be called as short option
+                if (optarg) {
+                    if ((devVals.installType = atoi(optarg)) > 2 || devVals.installType < 0){
+                        warning("Unknown installType %d. Setting installType to default (%d)\n",devVals.installType,devVals.installType = kInstallTypeDefault);
+                    }
+                }else
+                    devVals.installType = kInstallTypeErase;
+                    erase_install = 1;
+                if (devVals.installType)
+                    printf("[TSSC] Manually setting install type = %s\n",devVals.installType == kInstallTypeErase ? "Erase" : "Update");
                 break;
             case 'l': // long option: "latest"; can be called as short option
                 flags |= FLAG_LATEST_IOS;
@@ -424,7 +438,7 @@ int main(int argc, const char * argv[]) {
             free((char*)versVals.version);
             if (--versionCnt == 0) reterror(-9, "[TSSC] Automatic firmware selection couldn't find non-beta firmware.\n");
         }
-        info("[TSSC] Selecting the latest version: %s\n",versVals.version);
+        info("[TSSC] Selecting the latest available firmware version: %s\n",versVals.version);
         if (bpos) *bpos= '\0';
         if (versions) free(versions[versionCnt-1]),free(versions);
     }
