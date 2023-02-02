@@ -126,6 +126,12 @@ static struct bbdevice bbdevices[] = {
     {"Mac13,2", 0, 0},         // Mac Studio (M1 Ultra, 2022)
     {"Mac14,2", 0, 0},         // MacBook Air (M2, 2022)
     {"Mac14,7", 0, 0},         // MacBook Pro (13-inch, M2, 2022)
+    {"Mac14,3", 0, 0},         // Mac mini (M2, 2023)
+    {"Mac14,5", 0, 0},         // MacBook Pro (14-inch, M2 Max, 2023)
+    {"Mac14,6", 0, 0},         // MacBook Pro (16-inch, M2 Max, 2023)
+    {"Mac14,9", 0, 0},         // MacBook Pro (14-inch, M2 Pro, 2023)
+    {"Mac14,10", 0, 0},        // MacBook Pro (16-inch, M2 Pro, 2023)
+    {"Mac14,12", 0, 0},        // Mac mini (M2 Pro, 2023)
     
     // Apple Displays
     {"AppleDisplay2,1", 0, 0}, // Studio Display
@@ -341,6 +347,7 @@ static struct bbdevice bbdevices[] = {
     {"AudioAccessory1,1",   0, 0},   // HomePod 1st gen
     {"AudioAccessory1,2",   0, 0},   // HomePod 1st gen (2018)
     {"AudioAccessory5,1",   0, 0},   // HomePod mini
+    {"AudioAccessory6,1",   0, 0},   // HomePod 2nd gen
     
     // Apple TVs
     {"AppleTV1,1",   0, 0},  // 1st gen
@@ -348,7 +355,7 @@ static struct bbdevice bbdevices[] = {
     {"AppleTV3,1",   0, 0},  // 3rd gen
     {"AppleTV3,2",   0, 0},  // 3rd gen (2013)
     {"AppleTV5,3",   0, 0},  // 4th gen
-    {"AppleTV6,2",   0, 0},  // 4K
+    {"AppleTV6,2",   0, 0},  // 4K 1st gen
     {"AppleTV11,1",  0, 0},  // 4K 2nd gen
     {"AppleTV14,1",  0, 0},  // 4K 3rd gen
     {NULL, 0, 0}
