@@ -129,9 +129,13 @@ static struct bbdevice bbdevices[] = {
     {"Mac14,3", 0, 0},         // Mac mini (M2, 2023)
     {"Mac14,5", 0, 0},         // MacBook Pro (14-inch, M2 Max, 2023)
     {"Mac14,6", 0, 0},         // MacBook Pro (16-inch, M2 Max, 2023)
+    {"Mac14,8", 0, 0},         // Mac Pro (M2 Ultra, 2023)
     {"Mac14,9", 0, 0},         // MacBook Pro (14-inch, M2 Pro, 2023)
     {"Mac14,10", 0, 0},        // MacBook Pro (16-inch, M2 Pro, 2023)
     {"Mac14,12", 0, 0},        // Mac mini (M2 Pro, 2023)
+    {"Mac14,13", 0, 0},        // Mac Studio (M2 Pro, 2023)
+    {"Mac14,14", 0, 0},        // Mac Studio (M2 Ultra, 2023)
+    {"Mac14,15", 0, 0},        // MacBook Air (15-inch, M2, 2023)
     
     // Apple Displays
     {"AppleDisplay2,1", 0, 0}, // Studio Display
