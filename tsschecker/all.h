@@ -9,7 +9,8 @@
 #ifndef all_h
 #define all_h
 
-#define TSSCHECKER_VERSION_MAJOR "0"
+#define TSSCHECKER_VERSION_MAJOR "1"
+#define TSSCHECKER_VERSION_MINOR "0"
 #define TSSCHECKER_VERSION_PATCH "0"
 
 #ifdef DEBUG // this is for developing with Xcode

@@ -22,13 +22,12 @@ it is created by the device with a nonce seed (generator) and then hashes that s
 ## Nonce Entangling (arm64e devices)
 arm64e devices such as the iPhone XR, Apple Watch Series 4 and all newer devices have nonce-entangling.
 
-Nonce Entangling works by further randomizing the boot nonce by encrypting it with the device's [unique ID key](https://www.theiphonewiki.com/wiki/UID_key),<br/>
+Nonce Entangling works by further randomizing the boot nonce by encrypting it with the device's [unique ID key](https://theapplewiki.com/wiki/UID_key),<br/>
 making the nonce created from the generator specific to that device only.
 
 To save tickets for an arm64e device, you must get the boot nonce that the device creates from your generator,<br/>
 the simpliest way to get a nonce/generator pair is to use airsquared's [blobsaver](https://github.com/airsquared/blobsaver) tool and read them from the device.
-
-if you need more information, [see this post on r/jailbreak](https://www.reddit.com/r/jailbreak/comments/cssh8f/tutorial_easiest_way_to_save_blobs_on_a12/).
+you can also use cryptiiic's [aes_nonce](https://github.com/Cryptiiiic/aes_nonce) python script to read the nonce/generator pair from the device as well.
 
 ## Nonce Collisions:
 
@@ -82,31 +81,32 @@ Usage: `tsschecker [OPTIONS]`
 
 Example: `tsschecker -d iPhone10,3 -B D22AP -e 5482657301265 -i 15.4.1 --generator 0x1111111111111111 -s`
 
-| option (short)	| option (long)					| description																																																													|
-|	------------------	|	------------------------------	|	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-|	`-h`					| `--help`								| prints usage information																																																								|        
-|	`-d`					| `--device MODEL`			| specify device by its model (eg. iPhone10,3)																																																|
-|	`-i`					| `--ios VERSION`				| specify firmware version (eg. 15.4.1)																																																			|
-|	`-Z`					| `--buildid BUILD `				| specify buildid instead of firmware version (eg. 19E258)																																											|
-|	`-B`					| `--boardconfig BOARD `	| specify boardconfig instead of device model (eg. d22ap)																																											|
-|	`-o`					| `--ota`								| check OTA signing status, instead of normal restore																																													|
-|	`-b`					| `--no-baseband`				| don't check baseband signing status. Request tickets without baseband																																					|
-|	 `-m`				| `--build-manifest`			| manually specify a BuildManifest (can be used with -d)																																											| 
-|	`-s`					| `--save`							| save fetched shsh blobs (mostly makes sense with -e)																																												|
-|	`-u`					| `--update-install`				| request update tickets instead of erase																																																		|  
-|	`-l`					| `--latest`							| use the latest public firmware version instead of manually specifying one<br/>especially useful with -s and -e for saving shsh blobs												|
-|	`-e`					| `--ecid ECID`					| manually specify ECID to be used for fetching blobs, instead of using random ones<br/>ECID must be either DEC or HEX eg. 5482657301265 or 0xab46efcbf71		|
-|	`-g`					| `--generator GEN`			| manually specify generator in HEX format 16 in length (eg. 0x1111111111111111)																																|
-|							| `--apnonce NONCE`			| manually specify ApNonce instead of using random ones<br/>(required when saving blobs for arm64e devices with matching generator)											|
-|							| `--sepnonce NONCE`		| manually specify SEP Nonce instead of using random ones (not required for saving blobs)																														|
-|							| `--bbsnum SNUM`			| manually specify BbSNUM in HEX to save valid BBTickets (not required for saving blobs)																														|
-|							| `--save-path PATH`			| specify output path for saving shsh blobs																																																	|
-|							| `--server-url URL`				| manually specify TSS server URL																																																					|
-|							| `--bplist`							| save fetched blobs in a binary plist (.bshsh2 format)																																													|
-|							| `--beta`								| request tickets for a beta instead of normal release (use with -o)																																							|
-|							| `--list-devices`					| list known devices from firmwares.json																																																		|
-|							| `--list-versions`				| list all known firmware versions for the specified device																																											|
-|							| `--nocache`						| ignore caches and re-download required files																																															|
-|							| `--print-tss-request`			| print the TSS request that will be sent to Apple																																															|
-|							| `--print-tss-response`		| print the TSS response that comes from Apple																																															|
-|							| `--raw`								| send raw file to Apple's TSS server (useful for debugging)																																										|
+| option (short)    | option (long)                     | description                                                                                                                                                |
+|-------------------|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-h`              | `--help`                          | prints usage information                                                                                                                                   |        
+| `-d`              | `--device MODEL`                  | specify device by its model (eg. iPhone10,3)                                                                                                               |
+| `-i`              | `--ios VERSION`                   | specify firmware version (eg. 15.4.1)                                                                                                                      |
+| `-Z`              | `--buildid BUILD `                | specify buildid instead of firmware version (eg. 19E258)                                                                                                   |
+| `-B`              | `--boardconfig BOARD `            | specify boardconfig instead of device model (eg. d22ap)                                                                                                    |
+| `-o`              | `--ota`                           | check OTA signing status, instead of normal restore                                                                                                        |
+| `-b`              | `--no-baseband`                   | don't check baseband signing status. Request tickets without baseband                                                                                      |
+| `-m`              | `--build-manifest`                | manually specify a BuildManifest (can be used with -d)                                                                                                     | 
+| `-s`              | `--save`                          | save fetched shsh blobs (mostly makes sense with -e)                                                                                                       |
+| `-u`              | `--update-install`                | request only update tickets                                                                                                                                |  
+| `-E`              | `--erase-install`                 | request only erase tickets                                                                                                                                 |  
+| `-l`              | `--latest`                        | use the latest public firmware version instead of manually specifying one<br/>especially useful with -s and -e for saving shsh blobs                       |
+| `-e`              | `--ecid ECID`                     | manually specify ECID to be used for fetching blobs, instead of using random ones<br/>ECID must be either DEC or HEX eg. 5482657301265 or 0xab46efcbf71    |
+| `-g`              | `--generator GEN`                 | manually specify generator in HEX format 16 in length (eg. 0x1111111111111111)                                                                             |
+|                   | `--apnonce NONCE`                 | manually specify ApNonce instead of using random ones<br/>(required when saving blobs for arm64e devices with matching generator)                          |
+|                   | `--sepnonce NONCE`                | manually specify SEP Nonce instead of using random ones (not required for saving blobs)                                                                    |
+|                   | `--bbsnum SNUM`                   | manually specify BbSNUM in HEX to save valid BBTickets (not required for saving blobs)                                                                     |
+|                   | `--save-path PATH`                | manually specify the output path for saving shsh blobs                                                                                                     |
+|                   | `--server-url URL`                | manually specify TSS server URL                                                                                                                            |
+|                   | `--bplist`                        | save fetched blobs as a binary plist in the .bshsh2 format (used with -s)                                                                                  |
+|                   | `--beta`                          | request tickets for a beta instead of normal release (use with -o)                                                                                         |
+|                   | `--list-devices`                  | list known devices from firmwares.json                                                                                                                     |
+|                   | `--list-versions`                 | list all known firmware versions for the specified device                                                                                                  |
+|                   | `--nocache`                       | ignore caches and re-download required files                                                                                                               |
+|                   | `--print-tss-request`             | print the TSS request that will be sent to Apple                                                                                                           |
+|                   | `--print-tss-response`            | print the TSS response that comes from Apple                                                                                                               |
+|                   | `--raw`                           | send raw file to Apple's TSS server (useful for debugging)                                                                                                 |

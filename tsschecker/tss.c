@@ -27,7 +27,7 @@
 #include <unistd.h>
 #include <curl/curl.h>
 #include <plist/plist.h>
-#define AUTH_VERSION "914.120.2"
+#define AUTH_VERSION "973.0.6"
 #ifdef WIN32
 #define TSS_CLIENT_VERSION_STRING "libauthinstall_Win-"AUTH_VERSION""
 #else
@@ -294,9 +294,13 @@ int tss_request_add_ap_img4_tags(plist_t request, plist_t parameters)
 	} else if (_plist_dict_get_bool(parameters, "RequiresUIDMode")) {
 		// The logic here is missing why this value is expected to be 'false'
 		plist_dict_set_item(request, "UID_MODE", plist_new_bool(0));
+		plist_dict_set_item(request, "Ap,SikaFuse", plist_new_int(0));
 	}
 
-    return 0;
+	if (plist_dict_get_item(parameters, "Ap,SikaFuse")) {
+		_plist_dict_copy_item(request, parameters, "Ap,SikaFuse", NULL);
+	}
+	return 0;
 }
 
 int tss_request_add_ap_img3_tags(plist_t request, plist_t parameters)

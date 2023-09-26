@@ -157,7 +157,7 @@ char *parseNonce(const char *nonce, size_t *parsedLen){
 int main(int argc, const char * argv[]) {
     int err = 0;
     int isSigned = 0;
-    printf("tsschecker version: "TSSCHECKER_VERSION_MAJOR"."TSSCHECKER_VERSION_COUNT"."TSSCHECKER_VERSION_PATCH"-"TSSCHECKER_VERSION_SHA"-"TSSCHECKER_BUILD_TYPE"\n");
+    printf("tsschecker version: "TSSCHECKER_VERSION_MAJOR"."TSSCHECKER_VERSION_MINOR"."TSSCHECKER_VERSION_COUNT"."TSSCHECKER_VERSION_PATCH"-"TSSCHECKER_VERSION_SHA"-"TSSCHECKER_BUILD_TYPE"\n");
     printf("%s\n",fragmentzip_version());
     
     dbglog = 1;
